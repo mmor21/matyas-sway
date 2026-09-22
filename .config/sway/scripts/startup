@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+## Matyas Sway — autostart orchestrator
+##
+## Launches the UI layer (bar, notifications), the system applets
+## (network, audio), and polkit. All launches are idempotent:
+## if the process is already running, nothing happens.
+
+##-- Helpers -----------------------------------------------------
+
+# run <cmd> [args...]
+# Start the command in the background if it isn't already running.
+run() {
+    if ! pgrep -x "$1" >/dev/null 2>&1; then
+        "$@" &
+    fi
+}
+
+# run_bg <cmd> [args...]
+# Always start in a subshell, detached, no output.
+run_bg() {
+    ("$@" >/dev/null 2>&1 &)
+}
+
+# restart <proc> <cmd> [args...]
+# If <proc> is running, terminate it cleanly, wait, then start <cmd>.
+# Use this for long-running daemons that need a fresh start on reload.
+restart() {
+    local proc="$1"
+    shift
+
+    if pgrep -x "$proc" >/dev/null 2>&1; then
+        pkill -TERM -x "$proc"
+        while pgrep -x "$proc" >/dev/null 2>&1; do
+            sleep 0.1
+        done
+    fi
+
+    "$@" >/dev/null 2>&1 &
+}
+
+##-- Core UI -----------------------------------------------------
+
+# Waybar via its wrapper (which sets --bar main-bar --config --style)
+restart waybar "$HOME/.config/sway/scripts/statusbar"
+
+# Mako via its wrapper
+restart mako "$HOME/.config/sway/scripts/notifications"
+
+##-- System applets ----------------------------------------------
+
+run nm-applet --indicator
+run mpd
+
+##-- Polkit ------------------------------------------------------
+
+# Launch a polkit authentication agent so GUI apps can request
+# elevated privileges. Try the common paths in order.
+if ! pidof xfce-polkit >/dev/null 2>&1 && \
+   ! pidof polkit-gnome-authentication-agent-1 >/dev/null 2>&1; then
+    for agent in \
+        /usr/lib/xfce-polkit/xfce-polkit \
+        /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 \
+        /usr/libexec/polkit-gnome-authentication-agent-1 ; do
+        if [[ -x "$agent" ]]; then
+            "$agent" &
+            break
+        fi
+    done
+fi
+
