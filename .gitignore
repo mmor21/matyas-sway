@@ -1,0 +1,35 @@
+# --- Never commit these ---
+# Secrets, keys, tokens
+*.key
+*.pem
+*_token*
+*_secret*
+
+# Personal state (regenerated, not source)
+theme/.mode_state
+**/.mode_state
+
+# Caches
+.cache/
+*.cache
+**/cache/
+
+# Backup files
+*.bak
+*.tmp
+*.swp
+*~
+
+# Editor / OS cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# --- Explicitly NOT ignored (config files) ---
+# Note: .config/ is fine to commit, we WANT it
+# Wallpapers are fine, they're part of the rice
+# Scripts are fine, they're part of the rice
+
+# --- But not the literal "dotfiles" pattern dirs ---
+# (Nothing here yet, but keeping note for later)
