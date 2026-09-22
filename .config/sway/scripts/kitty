@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+## Matyas Sway — Kitty terminal launcher
+##
+## Called from keybinds in the master config:
+##   $mod+Return        → kitty           (normal)
+##   $mod+Shift+Return  → kitty -f        (floating)
+##   $mod+$alt+Return   → kitty -F        (fullscreen)
+
+DIR="$HOME/.config/sway"
+CONFIG="$DIR/kitty/kitty.conf"
+
+# VirtualBox graphics workaround — harmless on bare metal
+cmd=(kitty)
+if [[ "$(systemd-detect-virt 2>/dev/null)" == "oracle" ]]; then
+    cmd=(env LIBGL_ALWAYS_SOFTWARE=1 kitty)
+fi
+
+if [[ "${1:-}" == "-f" ]]; then
+    # Floating window
+    "${cmd[@]}" \
+        --class kitty-float \
+        --config "$CONFIG"
+
+elif [[ "${1:-}" == "-F" ]]; then
+    # Fullscreen window
+    "${cmd[@]}" \
+        --class kitty-fullscreen \
+        --config "$CONFIG" \
+        --start-as fullscreen \
+        --override 'window_padding_width=30' \
+        --override 'font_size=14' \
+        --override 'background_opacity=0.95'
+
+else
+    # Normal window; pass any extra args through
+    "${cmd[@]}" --config "$CONFIG" "$@"
+fi
+
