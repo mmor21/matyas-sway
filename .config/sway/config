@@ -1,0 +1,200 @@
+## Matyas Sway — Master configuration file
+##
+## This file is a dispatcher. All real configuration lives in the
+## included fragments. Do not add settings here unless they are
+## global defaults that don't belong to a specific concern.
+
+##-- Mod Keys ----------------------------
+set $mod Mod4
+set $alt Mod1
+
+##-- Fonts (Global) ----------------------
+font pango:Noto Sans Mono 10
+
+##-- Config fragments --------------------
+include ~/.config/sway/sway-idle
+include ~/.config/sway/sway-input
+include ~/.config/sway/sway-output
+include ~/.config/sway/sway-theme
+include ~/.config/sway/sway-modes
+
+##-- General Settings --------------------
+default_orientation horizontal
+swaybg_command swaybg
+swaynag_command swaynag
+workspace_layout default
+xwayland enable
+focus_follows_mouse yes
+floating_modifier $mod normal
+mouse_warping none
+popup_during_fullscreen smart
+workspace_auto_back_and_forth yes
+focus_on_window_activation smart
+show_marks yes
+
+##-- Variables ---------------------------
+set $kitty            ~/.config/sway/scripts/kitty
+set $volume           ~/.config/sway/scripts/volume
+set $backlight        ~/.config/sway/scripts/brightness
+set $screenshot       ~/.config/sway/scripts/screenshot
+set $lockscreen       ~/.config/sway/scripts/lockscreen
+set $colorpicker      ~/.config/sway/scripts/colorpicker
+set $files            thunar
+set $browser          firefox
+
+set $rofi_launcher    ~/.config/sway/scripts/rofi_launcher
+set $rofi_runner      ~/.config/sway/scripts/rofi_runner
+set $rofi_powermenu   ~/.config/sway/scripts/rofi_powermenu
+set $rofi_screenshot  ~/.config/sway/scripts/rofi_screenshot
+set $rofi_network     ~/.config/sway/scripts/rofi_network
+set $rofi_bluetooth   ~/.config/sway/scripts/rofi_bluetooth
+set $rofi_asroot      ~/.config/sway/scripts/rofi_asroot
+
+##-- Startup Programs --------------------
+exec_always ~/.config/sway/scripts/startup
+
+##-- Keybindings -------------------------
+
+# -- Terminal --
+bindsym $mod+Return          exec $kitty
+bindsym $mod+Shift+Return    exec $kitty -f
+bindsym $mod+$alt+Return     exec $kitty -F
+
+# -- GUI Apps --
+bindsym $mod+Shift+f         exec $files
+bindsym $mod+Shift+w         exec $browser
+
+# -- Rofi --
+bindsym $alt+F1              exec $rofi_launcher
+bindsym $alt+F2              exec $rofi_runner
+bindsym $mod+d               exec $rofi_launcher
+bindsym $mod+r               exec $rofi_asroot
+bindsym $mod+n               exec $rofi_network
+bindsym $mod+x               exec $rofi_powermenu
+bindsym $mod+s               exec $rofi_screenshot
+bindsym $mod+b               exec $rofi_bluetooth
+
+# -- Misc --
+bindsym $mod+p               exec $colorpicker
+
+# -- Function keys --
+bindsym XF86MonBrightnessUp     exec "$backlight --inc"
+bindsym XF86MonBrightnessDown   exec "$backlight --dec"
+bindsym XF86AudioRaiseVolume    exec "$volume --inc"
+bindsym XF86AudioLowerVolume    exec "$volume --dec"
+bindsym XF86AudioMute           exec "$volume --toggle"
+bindsym XF86AudioMicMute        exec "$volume --toggle-mic"
+
+# -- Screenshots --
+bindsym Print                   exec "$screenshot --now"
+bindsym $alt+Print              exec "$screenshot --in5"
+bindsym Shift+Print             exec "$screenshot --in10"
+bindsym Control+Print           exec "$screenshot --win"
+bindsym $mod+Print              exec "$screenshot --area"
+
+# -- Lock screen --
+bindsym $alt+Control+l          exec "$lockscreen"
+
+##-- Window management -------------------
+
+# Kill focused window
+bindsym $mod+q kill
+bindsym $mod+c kill
+
+# Splitting
+bindsym $mod+h split horizontal, exec notify-send -u low "Split Horizontally"
+bindsym $mod+v split vertical,   exec notify-send -u low "Split Vertically"
+bindsym $mod+g split toggle,     exec notify-send -u low "Split Mode"
+
+# Layouts
+bindsym $mod+Shift+s layout stacking,        exec notify-send -u low "Layout - Stacking"
+bindsym $mod+Shift+t layout tabbed,          exec notify-send -u low "Layout - Tabbed"
+bindsym $mod+Shift+d layout default,         exec notify-send -u low "Layout - Default"
+bindsym $mod+Shift+l layout toggle,          exec notify-send -u low "Cycling Layouts"
+bindsym $mod+Shift+v layout toggle split,    exec notify-send -u low "Layout - Hor/Vert"
+bindsym $mod+f       fullscreen toggle,      exec notify-send -u low "Toggled Fullscreen"
+bindsym $mod+space   floating toggle,        exec notify-send -u low "Toggled Floating Mode"
+
+# Focusing
+bindsym $mod+Left            focus left
+bindsym $mod+Down            focus down
+bindsym $mod+Up              focus up
+bindsym $mod+Right           focus right
+bindsym $mod+a               focus parent
+bindsym $mod+z               focus child
+bindsym $mod+Tab             focus next
+bindsym $mod+Shift+space     focus mode_toggle
+
+# Moving windows
+bindsym $mod+Shift+Left      move left
+bindsym $mod+Shift+Down      move down
+bindsym $mod+Shift+Up        move up
+bindsym $mod+Shift+Right     move right
+bindsym $mod+$alt+c          move absolute position center
+bindsym $mod+$alt+p          move position mouse
+
+# Resizing (modifier + alt + arrow)
+bindsym $mod+$alt+Left       resize shrink width 10 px or 10 ppt
+bindsym $mod+$alt+Down       resize grow height 10 px or 10 ppt
+bindsym $mod+$alt+Up         resize shrink height 10 px or 10 ppt
+bindsym $mod+$alt+Right      resize grow width 10 px or 10 ppt
+
+# Sticky / borders / scratchpad
+bindsym $mod+o               sticky toggle
+bindsym $mod+y               border toggle
+bindsym $mod+minus           move scratchpad
+bindsym $mod+Shift+minus     scratchpad show
+
+# Reload / exit
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+q exit
+
+##-- Workspaces --------------------------
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+set $ws10 "10"
+
+bindsym $mod+1 workspace number $ws1
+bindsym $mod+2 workspace number $ws2
+bindsym $mod+3 workspace number $ws3
+bindsym $mod+4 workspace number $ws4
+bindsym $mod+5 workspace number $ws5
+bindsym $mod+6 workspace number $ws6
+bindsym $mod+7 workspace number $ws7
+bindsym $mod+8 workspace number $ws8
+bindsym $mod+9 workspace number $ws9
+bindsym $mod+0 workspace number $ws10
+
+bindsym $mod+Shift+1 move container to workspace number $ws1
+bindsym $mod+Shift+2 move container to workspace number $ws2
+bindsym $mod+Shift+3 move container to workspace number $ws3
+bindsym $mod+Shift+4 move container to workspace number $ws4
+bindsym $mod+Shift+5 move container to workspace number $ws5
+bindsym $mod+Shift+6 move container to workspace number $ws6
+bindsym $mod+Shift+7 move container to workspace number $ws7
+bindsym $mod+Shift+8 move container to workspace number $ws8
+bindsym $mod+Shift+9 move container to workspace number $ws9
+bindsym $mod+Shift+0 move container to workspace number $ws10
+
+##-- Window rules -----------------------
+for_window [window_role="pop-up"]      floating enable
+for_window [window_role="task_dialog"] floating enable
+for_window [app_id="kitty-float"]      floating enable
+for_window [app_id="yad"]              floating enable
+for_window [app_id="pavucontrol"]      floating enable
+for_window [app_id="nm-connection-editor"] floating enable
+for_window [app_id="xfce-polkit"]      floating enable
+for_window [app_id="thunar" title="Rename.*"]                  floating enable
+for_window [app_id="thunar" title="File Operation Progress.*"] floating enable
+for_window [app_id="thunar" title="Confirm to replace.*"]      floating enable
+
+##-- System includes --------------------
+include /etc/sway/config.d/*
+
