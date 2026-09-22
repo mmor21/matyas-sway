@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+## Matyas Sway — Light/dark mode toggle
+##
+## With no arguments:  prints the current mode (for Waybar or scripts).
+## With --toggle:      flips the mode and calls theme.sh to apply it.
+##
+## Not currently a bar module (dropped from layout in Phase 0).
+## Intended to be invoked from a keybind.
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+STATE_FILE="$DIR/theme/.mode_state"
+
+# Ensure the state file exists
+if [[ ! -f "$STATE_FILE" ]]; then
+    echo "dark" > "$STATE_FILE"
+fi
+
+# Toggle the mode and apply it
+apply_mode() {
+    if [[ "$(cat "$STATE_FILE")" == "dark" ]]; then
+        "$DIR/theme/theme.sh" --light
+        echo "light" > "$STATE_FILE"
+    else
+        "$DIR/theme/theme.sh" --default
+        echo "dark" > "$STATE_FILE"
+    fi
+}
+
+# Print the current state (for scripting / display)
+show_info() {
+    if [[ "$(cat "$STATE_FILE")" == "dark" ]]; then
+        echo -e "\ndark\noff"
+    else
+        echo -e "\nlight\non"
+    fi
+}
+
+# Dispatch
+case "${1:-}" in
+    --toggle) apply_mode ;;
+    *)        show_info ;;
+esac
