@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+## Matyas Sway — Screenshot tool
+##
+## Called from master config's Print keybinds:
+##   Print              → screenshot --now
+##   $alt+Print         → screenshot --in5
+##   Shift+Print        → screenshot --in10
+##   Control+Print      → screenshot --win
+##   $mod+Print         → screenshot --area
+##
+## Saves to ~/Pictures/Screenshots/ and copies to clipboard.
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+iDIR="$DIR/mako/icons"
+
+# Read accent color from the shared rofi colors file for the slurp overlay
+background="$(grep 'background:' "$DIR/rofi/shared/colors.rasi" | cut -d: -f2 | tr -d ' ;')"
+accent="$(grep 'selected:'     "$DIR/rofi/shared/colors.rasi" | cut -d: -f2 | tr -d ' ;')"
+
+# Screenshot destination
+time="$(date +%Y-%m-%d-%H-%M-%S)"
+geometry="$(swaymsg -pt get_outputs | grep 'Current mode:' | cut -d: -f2 | cut -d@ -f1 | tr -d ' ')"
+dir="$(xdg-user-dir PICTURES)/Screenshots"
+file="Screenshot_${time}_${geometry}.png"
+
+mkdir -p "$dir"
+
+# Notify + optional sound
+notify_shot() {
+    local msg="$1"
+    notify-send \
+        -h string:x-canonical-private-synchronous:sys-notify-shot \
+        -u low \
+        -i "$iDIR/picture.png" \
+        "$msg"
+}
+
+# Countdown for delayed shots
+countdown() {
+    local sec
+    for sec in $(seq "$1" -1 1); do
+        notify-send \
+            -h string:x-canonical-private-synchronous:sys-notify-count \
+            -t 1000 \
+            -i "$iDIR/timer.png" \
+            "Taking shot in : $sec"
+        sleep 1
+    done
+}
+
+# Full desktop, immediate
+shotnow() {
+    cd "$dir"
+    sleep 0.5
+    grim - | tee "$file" | wl-copy
+    paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga 2>/dev/null &
+    notify_shot 'Screenshot saved and copied to clipboard.'
+}
+
+# Full desktop, delay
+shot_delay() {
+    countdown "$1"
+    sleep 1
+    cd "$dir"
+    grim - | tee "$file" | wl-copy
+    paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga 2>/dev/null &
+    notify_shot 'Screenshot saved and copied to clipboard.'
+}
+
+# Focused window
+shotwin() {
+    cd "$dir"
+    grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.focused?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"')" - | tee "$file" | wl-copy
+    paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga 2>/dev/null &
+    notify_shot 'Screenshot saved and copied to clipboard.'
+}
+
+# User-selected area via slurp
+shotarea() {
+    cd "$dir"
+    grim -g "$(slurp -b "${background:1}CC" -c "${accent:1}ff" -s "${accent:1}0D" -w 2 && sleep 0.3)" - | tee "$file" | wl-copy
+    paplay /usr/share/sounds/freedesktop/stereo/screen-capture.oga 2>/dev/null &
+    notify_shot 'Screenshot saved and copied to clipboard.'
+}
+
+# Dispatch
+case "${1:-}" in
+    --now)   shotnow ;;
+    --in5)   shot_delay 5 ;;
+    --in10)  shot_delay 10 ;;
+    --win)   shotwin ;;
+    --area)  shotarea ;;
+    *)       echo 'Available options: --now --in5 --in10 --win --area' ;;
+esac
+
+exit 0
+
