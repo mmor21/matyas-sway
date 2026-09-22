@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+## Matyas Sway — Waybar launcher
+##
+## Called from scripts/startup and from anywhere else that needs to
+## (re)start the bar. Uses exec so the shell process is replaced.
+
+CONFIG="$HOME/.config/sway/waybar/config"
+STYLE="$HOME/.config/sway/waybar/style.css"
+
+exec waybar --bar main-bar --log-level error --config "$CONFIG" --style "$STYLE"
+
