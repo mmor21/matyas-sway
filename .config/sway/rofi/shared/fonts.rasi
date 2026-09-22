@@ -1,0 +1,5 @@
+/* Matyas Sway — Rofi shared fonts */
+
+* {
+    font: "Noto Sans Mono 10";
+}

@@ -1,0 +1,13 @@
+/* Matyas Sway — Rofi shared colors
+ *
+ * Overwritten by theme.sh when a theme is selected.
+ */
+
+* {
+    background:     #2b303b;
+    background-alt: #343d46;
+    foreground:     #c0c5ce;
+    selected:       #8fa1b3;
+    active:         #a3be8c;
+    urgent:         #bf616a;
+}
