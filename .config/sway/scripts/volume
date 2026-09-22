@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+## Matyas Sway — Volume control
+##
+## Called from master config's XF86Audio* keybinds:
+##   XF86AudioRaiseVolume → volume --inc
+##   XF86AudioLowerVolume → volume --dec
+##   XF86AudioMute        → volume --toggle
+##   XF86AudioMicMute     → volume --toggle-mic
+##
+## Uses pamixer (pulseaudio/pipewire CLI frontend).
+
+set -euo pipefail
+
+iDIR="$HOME/.config/sway/mako/icons"
+notify_cmd='notify-send -h string:x-canonical-private-synchronous:sys-notify-volume -u low'
+
+# Get current volume as an integer 0-100
+get_volume() {
+    pamixer --get-volume
+}
+
+# Pick an icon based on the current volume
+get_icon() {
+    local current
+    current="$(get_volume)"
+    if   (( current == 0 )); then
+        icon="$iDIR/volume-mute.png"
+    elif (( current <= 30 )); then
+        icon="$iDIR/volume-low.png"
+    elif (( current <= 60 )); then
+        icon="$iDIR/volume-mid.png"
+    else
+        icon="$iDIR/volume-high.png"
+    fi
+}
+
+# Send a notification
+notify_user() {
+    ${notify_cmd} -i "$icon" "Volume : $(get_volume)%"
+}
+
+# Increase
+inc_volume() {
+    if [[ "$(pamixer --get-mute)" == "true" ]]; then
+        pamixer --unmute
+    fi
+    pamixer --allow-boost --increase 5
+    get_icon
+    notify_user
+}
+
+# Decrease
+dec_volume() {
+    if [[ "$(pamixer --get-mute)" == "true" ]]; then
+        pamixer --unmute
+    fi
+    pamixer --decrease 5
+    get_icon
+    notify_user
+}
+
+# Toggle mute
+toggle_mute() {
+    if [[ "$(pamixer --get-mute)" == "false" ]]; then
+        pamixer --mute
+        ${notify_cmd} -i "$iDIR/volume-mute.png" "Mute"
+    else
+        pamixer --unmute
+        get_icon
+        ${notify_cmd} -i "$icon" "Unmute"
+    fi
+}
+
+# Toggle mic mute
+toggle_mic() {
+    if [[ "$(pamixer --default-source --get-mute)" == "false" ]]; then
+        pamixer --default-source --mute
+        ${notify_cmd} -i "$iDIR/microphone-mute.png" "Microphone Switched OFF"
+    else
+        pamixer --default-source --unmute
+        ${notify_cmd} -i "$iDIR/microphone.png" "Microphone Switched ON"
+    fi
+}
+
+# Dispatch
+case "${1:-}" in
+    --inc)        inc_volume ;;
+    --dec)        dec_volume ;;
+    --toggle)     toggle_mute ;;
+    --toggle-mic) toggle_mic ;;
+    *)            echo "$(get_volume)%" ;;
+esac
+
