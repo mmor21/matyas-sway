@@ -1,0 +1,32 @@
+// Matyas Sway — Waybar bar configuration
+//
+// Declares bar geometry and the module layout.
+// Module definitions live in the included "modules" file.
+
+{
+    "include": "~/.config/sway/waybar/modules",
+
+    "name": "main-bar",
+    "id": "main-bar",
+
+    "layer": "top",
+    "exclusive": true,
+    "passthrough": false,
+    "position": "top",
+
+    "height": 32,
+    "width": "",
+    "spacing": 6,
+    "margin": 0,
+    "margin-top": 0,
+    "margin-bottom": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+
+    "fixed-center": true,
+    "ipc": true,
+
+    "modules-left":   ["sway/workspaces", "idle_inhibitor"],
+    "modules-center": ["clock"],
+    "modules-right":  ["pulseaudio", "backlight", "network", "bluetooth", "battery", "tray", "custom/power"]
+}
