@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+## Matyas Sway — Clamshell (lid) handler
+##
+## Not auto-started. To enable, uncomment the clamshell line in
+## the master config's Startup section:
+##
+##     exec_always ~/.config/sway/scripts/clamshell
+##
+## When the lid closes: disable the internal display.
+## When the lid opens:  re-enable it.
+
+set -euo pipefail
+
+# Find the lid device
+lid_dir="$(ls -d /proc/acpi/button/lid/* 2>/dev/null | head -n1)"
+if [[ -z "$lid_dir" ]]; then
+    echo "No lid device found." >&2
+    exit 1
+fi
+
+# Find the internal output (first eDP-* or LVDS-*)
+output="$(swaymsg -pt get_outputs 2>/dev/null | awk '/^Output/ {print $2}' | grep -E '^(eDP|LVDS)-' | head -n1)"
+if [[ -z "$output" ]]; then
+    output="eDP-1"   # sensible fallback
+fi
+
+# Check lid state and act
+if grep -q open "$lid_dir/state"; then
+    swaymsg output "$output" enable
+else
+    swaymsg output "$output" disable
+fi
+
