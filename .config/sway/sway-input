@@ -1,0 +1,36 @@
+##-- Input configuration -----------------
+##
+## You can list your input device names with:
+##     swaymsg -t get_inputs
+##
+## See man 5 sway-input for the full reference.
+
+## Touchpad (matches any touchpad by type)
+input type:touchpad {
+    dwt enabled                 # disable touchpad while typing
+    tap enabled                 # tap to click
+    tap_button_map lrm          # left/right/middle mapping
+    drag enabled                # tap-and-drag
+    drag_lock enabled           # hold after drag
+    natural_scroll disabled     # "natural" direction (off = traditional)
+    middle_emulation enabled    # middle click via 3-finger tap
+    scroll_method two_finger
+    pointer_accel 0.4
+}
+
+## Mouse (matches any pointer device)
+input type:pointer {
+    accel_profile adaptive
+    pointer_accel 0.0
+}
+
+## Keyboard — default layout, US English
+## If you need a second layout, uncomment and adjust.
+input type:keyboard {
+    xkb_layout us
+    # xkb_variant
+    # xkb_options grp:alt_shift_toggle
+    repeat_delay 300
+    repeat_rate 30
+}
+
