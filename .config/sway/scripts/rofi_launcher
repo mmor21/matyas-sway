@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi application launcher
+## Bound to: $mod+d, $alt+F1
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/launcher.rasi"
+
+exec rofi -show drun -theme "$RASI"

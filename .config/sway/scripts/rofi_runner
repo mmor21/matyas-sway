@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi command runner
+## Bound to: $alt+F2
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/runner.rasi"
+
+exec rofi -show run -theme "$RASI"

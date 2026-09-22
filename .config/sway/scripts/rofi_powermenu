@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi power menu
+## Bound to: $mod+x, custom/power Waybar module
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/powermenu.rasi"
+CNFR="$DIR/rofi/confirm.rasi"
+
+prompt="$(hostname)"
+mesg="Uptime: $(uptime -p | sed -e 's/up //g')"
+
+option_1=''
+option_2=''
+option_3=''
+option_4=''
+option_5=''
+option_6=''
+
+yes=''
+no=''
+
+rofi_cmd() {
+    rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
+}
+
+run_rofi() {
+    printf '%s\n' "$option_1" "$option_2" "$option_3" "$option_4" "$option_5" "$option_6" | rofi_cmd
+}
+
+confirm_cmd() {
+    rofi -dmenu -p 'Confirmation' -mesg 'Are you sure?' -selected-row 1 -no-click-to-exit -theme "$CNFR"
+}
+
+confirm_exit() {
+    printf '%s\n' "$yes" "$no" | confirm_cmd
+}
+
+confirm_run() {
+    selected="$(confirm_exit)"
+    if [[ "$selected" == "$yes" ]]; then
+        "$@"
+    fi
+}
+
+run_cmd() {
+    case "$1" in
+        --lock)     "$DIR/scripts/lockscreen" ;;
+        --logout)   confirm_run swaymsg exit ;;
+        --suspend)  confirm_run bash -c 'mpc -q pause 2>/dev/null; systemctl suspend' ;;
+        --hibernate) confirm_run systemctl hibernate ;;
+        --reboot)   confirm_run systemctl reboot ;;
+        --shutdown) confirm_run systemctl poweroff ;;
+    esac
+}
+
+chosen="$(run_rofi)"
+case "$chosen" in
+    "$option_1") run_cmd --lock ;;
+    "$option_2") run_cmd --logout ;;
+    "$option_3") run_cmd --suspend ;;
+    "$option_4") run_cmd --hibernate ;;
+    "$option_5") run_cmd --reboot ;;
+    "$option_6") run_cmd --shutdown ;;
+esac
