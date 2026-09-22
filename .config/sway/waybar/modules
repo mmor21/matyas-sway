@@ -1,0 +1,167 @@
+// Matyas Sway — Waybar module definitions
+//
+// Every module referenced in waybar/config is defined here.
+
+{
+    // ─── Workspaces ─────────────────────────────────────────────
+    "sway/workspaces": {
+        "disable-scroll": false,
+        "disable-click": false,
+        "all-outputs": true,
+        "format": "{icon}",
+        "format-icons": {
+            "1":  "",
+            "2":  "",
+            "3":  "",
+            "4":  "",
+            "5":  "",
+            "6":  "",
+            "7":  "",
+            "8":  "",
+            "9":  "",
+            "10": ""
+        },
+        "smooth-scrolling-threshold": 1,
+        "disable-scroll-wraparound": false,
+        "enable-bar-scroll": false,
+        "disable-markup": false,
+        "current-only": false
+    },
+
+    // ─── Idle inhibitor ────────────────────────────────────────
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated":   "",
+            "deactivated": ""
+        },
+        "timeout": 30
+    },
+
+    // ─── Clock ─────────────────────────────────────────────────
+    // Left-click toggles time/date.
+    // Hover shows a Monday-first month calendar.
+    // Scroll up/down to move between months.
+    "clock": {
+        "interval": 60,
+        "align": 0,
+        "rotate": 0,
+        "locale": "en_GB.UTF-8",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                "months":   "<span color='@foreground'><b>{}</b></span>",
+                "days":     "<span color='@foreground'><b>{}</b></span>",
+                "weeks":    "<span color='@cyan'><b>W{}</b></span>",
+                "weekdays": "<span color='@yellow'><b>{}</b></span>",
+                "today":    "<span background='@selected' color='@background'><b><u>{}</u></b></span>"
+            }
+        },
+        "format":     " {:%I:%M %p}",
+        "format-alt": " {:%a %b %d, %G}"
+    },
+
+    // ─── PulseAudio ────────────────────────────────────────────
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": " Mute",
+        "format-bluetooth": " {volume}%",
+        "format-bluetooth-muted": " Mute",
+        "format-source": " {volume}%",
+        "format-source-muted": " Mute",
+        "format-icons": {
+            "headphone":  "",
+            "hands-free": "",
+            "headset":    "",
+            "phone":      "",
+            "portable":   "",
+            "car":        "",
+            "default":    ["", "", ""]
+        },
+        "scroll-step": 5.0,
+        "on-click": "pamixer --toggle-mute",
+        "on-click-right": "pavucontrol",
+        "smooth-scrolling-threshold": 1
+    },
+
+    // ─── Backlight ─────────────────────────────────────────────
+    "backlight": {
+        "interval": 2,
+        "align": 0,
+        "rotate": 0,
+        "format": "{icon} {percent}%",
+        "format-icons": ["", "", "", ""],
+        "on-click": "",
+        "on-scroll-up":   "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-",
+        "smooth-scrolling-threshold": 1
+    },
+
+    // ─── Network ───────────────────────────────────────────────
+    "network": {
+        "interval": 5,
+        "format-wifi":         " {essid}",
+        "format-ethernet":     " {ipaddr}/{cidr}",
+        "format-linked":       " {ifname} (No IP)",
+        "format-disconnected": " Disconnected",
+        "format-disabled":     " Disabled",
+        "format-alt":          " {bandwidthUpBits} |  {bandwidthDownBits}",
+        "tooltip-format":      " {ifname} via {gwaddr}",
+        "on-click-right": "~/.config/sway/scripts/rofi_network"
+    },
+
+    // ─── Bluetooth ─────────────────────────────────────────────
+    "bluetooth": {
+        "format":             " {status}",
+        "format-on":          " {status}",
+        "format-off":         " {status}",
+        "format-disabled":    " {status}",
+        "format-connected":   " {device_alias}",
+        "format-connected-battery": " {device_alias}, {device_battery_percentage}%",
+        "tooltip": true,
+        "tooltip-format": "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "on-click":       "~/.config/sway/scripts/rofi_bluetooth",
+        "on-click-right": "blueman-manager"
+    },
+
+    // ─── Battery ───────────────────────────────────────────────
+    "battery": {
+        "interval": 60,
+        "align": 0,
+        "rotate": 0,
+        "full-at": 100,
+        "design-capacity": false,
+        "states": {
+            "good":     95,
+            "warning":  30,
+            "critical": 15
+        },
+        "format":          "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged":  " {capacity}%",
+        "format-full":     "{icon} Full",
+        "format-alt":      "{icon} {time}",
+        "format-icons": ["", "", "", "", ""],
+        "format-time": "{H}h {M}min",
+        "tooltip": true
+    },
+
+    // ─── Tray ──────────────────────────────────────────────────
+    "tray": {
+        "icon-size": 16,
+        "spacing": 10
+    },
+
+    // ─── Custom: power button ──────────────────────────────────
+    "custom/power": {
+        "format": "",
+        "tooltip": false,
+        "on-click": "~/.config/sway/scripts/rofi_powermenu"
+    }
+}
