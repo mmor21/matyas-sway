@@ -1,0 +1,21 @@
+##-- Idle configuration ------------------
+##
+## Sway's idle daemon (swayidle) runs the given commands after the given
+## timeouts. All timeouts are in seconds.
+##
+## Current behavior:
+##   5 minutes  : lock the screen
+##  10 minutes  : turn off the display (dpms off)
+##  on resume   : turn the display back on
+##  before sleep: lock the screen
+##
+## The lockscreen command is a script (see scripts/lockscreen). This is
+## deliberate: it lets the theme system swap the lock screen appearance
+## without touching this file.
+
+exec swayidle -w \
+    timeout  300 "$lockscreen" \
+    timeout  600 'swaymsg "output * dpms off"' \
+    resume        'swaymsg "output * dpms on"' \
+    before-sleep  "$lockscreen"
+
