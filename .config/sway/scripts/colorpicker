@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+## Matyas Sway — Color picker
+##
+## Called from master config:
+##   $mod+p → colorpicker
+##
+## Runs hyprpicker, copies the picked color to the clipboard, and
+## shows a notification with a preview swatch.
+
+set -euo pipefail
+
+color="$(hyprpicker)" || exit 0
+
+# User cancelled
+[[ -z "$color" ]] && exit 0
+
+# Copy hex code to clipboard (no trailing newline)
+printf '%s' "$color" | wl-copy
+
+# Generate a preview swatch if ImageMagick is available
+image="/tmp/${color#\#}.png"
+if command -v convert >/dev/null 2>&1; then
+    convert -size 48x48 "xc:$color" "$image" 2>/dev/null || image=""
+fi
+
+# Notify
+if [[ -n "$image" ]]; then
+    notify-send \
+        -h string:x-canonical-private-synchronous:sys-notify-picker \
+        -u low \
+        -i "$image" \
+        "$color copied to clipboard."
+else
+    notify-send \
+        -h string:x-canonical-private-synchronous:sys-notify-picker \
+        -u low \
+        "$color copied to clipboard."
+fi
+
