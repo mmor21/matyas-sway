@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+## Matyas Sway — Mako notification daemon launcher
+##
+## Called from scripts/startup. Uses exec so the shell process is
+## replaced.
+
+CONFIG="$HOME/.config/sway/mako/config"
+
+exec mako --config "$CONFIG"
+
