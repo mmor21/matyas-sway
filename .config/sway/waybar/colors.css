@@ -1,0 +1,20 @@
+/* Matyas Sway — Waybar colors
+ *
+ * These are overwritten by theme.sh when a new theme is selected.
+ * The names are the ones referenced in style.css and in the calendar
+ * format strings in waybar/modules.
+ */
+
+@define-color background     #2b303b;
+@define-color background-alt #343d46;
+@define-color foreground     #c0c5ce;
+@define-color foreground-alt #65737e;
+@define-color selected       #8fa1b3;
+@define-color black          #2b303b;
+@define-color red            #bf616a;
+@define-color green          #a3be8c;
+@define-color yellow         #ebcb8b;
+@define-color blue           #8fa1b3;
+@define-color magenta        #b48ead;
+@define-color cyan           #96b5b4;
+@define-color white          #c0c5ce;
