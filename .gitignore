@@ -33,3 +33,6 @@ Thumbs.db
 
 # --- But not the literal "dotfiles" pattern dirs ---
 # (Nothing here yet, but keeping note for later)
+
+# Generated at runtime by theme.sh (initial version tracked once)
+theme/current.bash
