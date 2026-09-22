@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi MPD control menu
+## Not bound by default. Available for manual invocation.
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/music.rasi"
+iDIR="$DIR/mako/icons"
+
+status="$(mpc status 2>/dev/null || true)"
+if [[ -z "$status" ]]; then
+    prompt='Offline'
+    mesg='MPD is Offline'
+else
+    prompt="$(mpc -f '%artist%' current 2>/dev/null)"
+    mesg="$(mpc -f '%title%' current 2>/dev/null) :: $(mpc status | grep '#' | awk '{print $3}')"
+fi
+
+if [[ "${status}" == *"[playing]"* ]]; then
+    option_1=' Pause'
+else
+    option_1=' Play'
+fi
+option_2=' Stop'
+option_3=' Previous'
+option_4=' Next'
+option_5=' Repeat'
+option_6=' Random'
+
+rofi_cmd() {
+    rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
+}
+
+run_rofi() {
+    printf '%s\n' "$option_1" "$option_2" "$option_3" "$option_4" "$option_5" "$option_6" | rofi_cmd
+}
+
+notify_song="notify-send -h string:x-canonical-private-synchronous:sys-notify-song -u low -i $iDIR/music.png"
+
+run_cmd() {
+    case "$1" in
+        --opt1) mpc -q toggle && $notify_song "$(mpc -f '%artist%' current)" ;;
+        --opt2) mpc -q stop ;;
+        --opt3) mpc -q prev && $notify_song "$(mpc -f '%artist%' current)" ;;
+        --opt4) mpc -q next && $notify_song "$(mpc -f '%artist%' current)" ;;
+        --opt5) mpc -q repeat ;;
+        --opt6) mpc -q random ;;
+    esac
+}
+
+chosen="$(run_rofi)"
+case "$chosen" in
+    "$option_1") run_cmd --opt1 ;;
+    "$option_2") run_cmd --opt2 ;;
+    "$option_3") run_cmd --opt3 ;;
+    "$option_4") run_cmd --opt4 ;;
+    "$option_5") run_cmd --opt5 ;;
+    "$option_6") run_cmd --opt6 ;;
+esac

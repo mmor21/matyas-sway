@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi askpass helper
+## Used by asroot and any sudo -A invocation.
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/askpass.rasi"
+
+exec rofi -dmenu -password -i -p "Root" -theme "$RASI"

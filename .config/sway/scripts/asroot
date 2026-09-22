@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+## Matyas Sway — Run a command as root via sudo -A
+## The askpass helper is rofi_askpass.
+
+DIR="$HOME/.config/sway"
+
+export SUDO_ASKPASS="$DIR/scripts/rofi_askpass"
+
+exec sudo -E -A "$@"

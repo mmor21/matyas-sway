@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi menu for running apps as root
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/asroot.rasi"
+ASROOT="$DIR/scripts/asroot"
+USER_NAME="$(whoami)"
+
+prompt='Root'
+mesg='Run Applications As Root'
+term="kitty --class kitty-float --config $DIR/kitty/kitty.conf"
+
+option_1=' Alacritty'
+option_2=' Thunar'
+option_3=' Geany'
+option_4=' Ranger'
+option_5=' Vim'
+
+rofi_cmd() {
+    rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
+}
+
+run_rofi() {
+    printf '%s\n' "$option_1" "$option_2" "$option_3" "$option_4" "$option_5" | rofi_cmd
+}
+
+run_cmd() {
+    case "$1" in
+        --opt1) "$ASROOT" "$term" ;;
+        --opt2) "$ASROOT" dbus-run-session thunar ;;
+        --opt3) "$ASROOT" geany ;;
+        --opt4) "$ASROOT" "$term" -e ranger ;;
+        --opt5) "$ASROOT" "$term" -e vim ;;
+    esac
+}
+
+chosen="$(run_rofi)"
+case "$chosen" in
+    "$option_1") run_cmd --opt1 ;;
+    "$option_2") run_cmd --opt2 ;;
+    "$option_3") run_cmd --opt3 ;;
+    "$option_4") run_cmd --opt4 ;;
+    "$option_5") run_cmd --opt5 ;;
+esac
