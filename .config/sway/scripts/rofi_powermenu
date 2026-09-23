@@ -11,15 +11,15 @@ CNFR="$DIR/rofi/confirm.rasi"
 prompt="$(hostname)"
 mesg="Uptime: $(uptime -p | sed -e 's/up //g')"
 
-option_1=''
-option_2=''
-option_3=''
-option_4=''
-option_5=''
-option_6=''
+option_1='Lock'
+option_2='Logout'
+option_3='Suspend'
+option_4='Hibernate'
+option_5='Reboot'
+option_6='Shutdown'
 
-yes=''
-no=''
+yes='Yes'
+no='No'
 
 rofi_cmd() {
     rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
