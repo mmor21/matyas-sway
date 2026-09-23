@@ -54,11 +54,11 @@
             "weeks-pos": "right",
             "on-scroll": 1,
             "format": {
-                "months":   "<span color='@foreground'><b>{}</b></span>",
-                "days":     "<span color='@foreground'><b>{}</b></span>",
-                "weeks":    "<span color='@cyan'><b>W{}</b></span>",
-                "weekdays": "<span color='@yellow'><b>{}</b></span>",
-                "today":    "<span background='@selected' color='@background'><b><u>{}</u></b></span>"
+                "months":   "<span color='#c0c5ce'><b>{}</b></span>",
+                "days":     "<span color='#c0c5ce'><b>{}</b></span>",
+                "weeks":    "<span color='#96b5b4'><b>W{}</b></span>",
+                "weekdays": "<span color='#ebcb8b'><b>{}</b></span>",
+                "today":    "<span background='#8fa1b3' color='#2b303b'><b><u>{}</u></b></span>"
             }
         },
         "format":     " {:%I:%M %p}",
