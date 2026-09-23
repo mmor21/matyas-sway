@@ -18,6 +18,12 @@ include ~/.config/sway/sway-output
 include ~/.config/sway/sway-theme
 include ~/.config/sway/sway-modes
 
+##-- User overrides ----------------------
+## Anything dropped into ~/.config/sway/config.d/ as *.conf will be
+## loaded after the base fragments above, allowing per-user overrides
+## without editing the base files.
+include ~/.config/sway/config.d/*.conf
+
 ##-- General Settings --------------------
 default_orientation horizontal
 swaybg_command swaybg
