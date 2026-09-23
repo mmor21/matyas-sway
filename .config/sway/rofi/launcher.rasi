@@ -2,9 +2,9 @@
 configuration {
     modi:                "drun,run,filebrowser";
     show-icons:          true;
-    display-drun:        "";
-    display-run:         "";
-    display-filebrowser: "";
+    display-drun:        "Apps";
+    display-run:         "Run";
+    display-filebrowser: "Files";
     drun-display-format: "{name}";
 }
 
