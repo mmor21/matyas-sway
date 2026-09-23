@@ -27,10 +27,17 @@ input type:pointer {
 ## Keyboard — default layout, US English
 ## If you need a second layout, uncomment and adjust.
 input type:keyboard {
-    xkb_layout us
+    xkb_layout hu
     # xkb_variant
     # xkb_options grp:alt_shift_toggle
     repeat_delay 300
     repeat_rate 30
 }
 
+
+## Touch display (laptop panel)
+## Maps any touch input device to the internal panel. On a single-panel
+## setup this is a no-op; on multi-monitor it ensures taps go to eDP-1.
+input "type:touch" {
+    map_to_output eDP-1
+}

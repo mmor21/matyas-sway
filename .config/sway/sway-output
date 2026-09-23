@@ -29,6 +29,6 @@ output * bg ~/.config/backgrounds/wallpaper.jpg fill
 ## Laptop with fractional scale (example):
 #output eDP-1 mode 1920x1200@60Hz
 #output eDP-1 position 0,0
-#output eDP-1 scale 1.25
+output eDP-1 scale 1.25
 #output eDP-1 scale_filter smart
 
