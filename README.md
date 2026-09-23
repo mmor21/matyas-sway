@@ -69,6 +69,52 @@ Requires `pywal` for the pywal mode.
     ├── light.bash            light palette
     └── current.bash          active palette (generated)
 
+
+## Bar and menu design (MVP 1)
+
+The bar and menus ship with **plain text labels** rather than icon
+glyphs. This is deliberate — it means no font dependency, no missing
+characters, no black boxes. Icons can be reintroduced in later
+versions once a text+icon Nerd Font is confirmed working.
+
+### Waybar
+
+- **Workspaces:** numeric labels `1` through `10`
+- **Idle inhibitor:** `[on]` / `[off]`
+- **Clock:** time + date, hover shows a Monday-first month calendar,
+  scroll to move between months
+- **Power button:** `⏻` (Unicode power symbol)
+- **Right side:** pulseaudio, backlight, network (SSID + click to
+  expand transfer stats), bluetooth, battery, tray
+
+### Rofi
+
+- **Launcher (`Super+D`):** drun mode by default, with mode-switcher
+  buttons for Apps / Run / Files
+- **Power menu (`Super+X`):** vertical list with text labels —
+  Lock / Logout / Suspend / Hibernate / Reboot / Shutdown
+- **Screenshot menu (`Super+S`):** vertical list —
+  Capture Desktop / Capture Area / Capture Window / Capture in 5s /
+  Capture in 10s
+- **Bluetooth menu (`Super+B`):** device management via rofi
+- **Network menu (`Super+N`):** requires `networkmanager-dmenu`
+  (AUR) — not installed by default
+
+### Wallpaper behavior
+
+`sway-output` ships with the wallpaper directive **commented out**.
+On first run there is no wallpaper — Sway starts cleanly with a
+black background.
+
+To enable a wallpaper:
+
+    cp /path/to/image.jpg ~/.config/backgrounds/wallpaper.jpg
+    ~/.config/sway/theme/theme.sh --default
+
+The second command writes the wallpaper line into `sway-output`
+and reloads Sway. If the wallpaper file is missing, this step is
+simply skipped — it will never break the session.
+
 ## Credits
 
 See [CREDITS.md](CREDITS.md).
