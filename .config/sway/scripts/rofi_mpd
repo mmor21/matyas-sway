@@ -18,15 +18,15 @@ else
 fi
 
 if [[ "${status}" == *"[playing]"* ]]; then
-    option_1=' Pause'
+    option_1='Pause'
 else
-    option_1=' Play'
+    option_1='Play'
 fi
-option_2=' Stop'
-option_3=' Previous'
-option_4=' Next'
-option_5=' Repeat'
-option_6=' Random'
+option_2='Stop'
+option_3='Previous'
+option_4='Next'
+option_5='Repeat'
+option_6='Random'
 
 rofi_cmd() {
     rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"

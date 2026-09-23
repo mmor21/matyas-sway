@@ -12,11 +12,11 @@ prompt='Root'
 mesg='Run Applications As Root'
 term="kitty --class kitty-float --config $DIR/kitty/kitty.conf"
 
-option_1=' Alacritty'
-option_2=' Thunar'
-option_3=' Geany'
-option_4=' Ranger'
-option_5=' Vim'
+option_1='Alacritty'
+option_2='Thunar'
+option_3='Geany'
+option_4='Ranger'
+option_5='Vim'
 
 rofi_cmd() {
     rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"

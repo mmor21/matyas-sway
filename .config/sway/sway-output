@@ -10,7 +10,8 @@
 ## Wallpaper — set on all outputs.
 ## The path is a placeholder; theme.sh will rewrite this line with the
 ## currently-selected wallpaper.
-output * bg ~/.config/backgrounds/wallpaper.jpg fill
+## Uncomment (or let theme.sh write it) when you have a wallpaper.
+## output * bg ~/.config/backgrounds/wallpaper.jpg fill
 
 ##-- Reference examples (commented out) ---------------------
 

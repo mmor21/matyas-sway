@@ -8,11 +8,11 @@ DIR="$HOME/.config/sway"
 RASI="$DIR/rofi/screenshot.rasi"
 SCRIPT="$DIR/scripts/screenshot"
 
-option_1=' Capture Desktop'
-option_2=' Capture Area'
-option_3=' Capture Window'
-option_4=' Capture in 5s'
-option_5=' Capture in 10s'
+option_1='Capture Desktop'
+option_2='Capture Area'
+option_3='Capture Window'
+option_4='Capture in 5s'
+option_5='Capture in 10s'
 
 rofi_cmd() {
     rofi -dmenu -p 'Screenshot' -mesg "Saved to: $(xdg-user-dir PICTURES)/Screenshots" -markup-rows -theme "$RASI"

@@ -141,7 +141,13 @@ source_pywal() {
 ##─ Per-component appliers ─────────────────────────────────────────
 
 apply_wallpaper() {
-    sed -i "s|^output \* bg.*|output * bg $wallpaper fill|" "$PATH_SWAY_OUTPUT"
+    if grep -q "^output \* bg" "$PATH_SWAY_OUTPUT"; then
+        # An active wallpaper line exists — replace it.
+        sed -i "s|^output \* bg.*|output * bg $wallpaper fill|" "$PATH_SWAY_OUTPUT"
+    else
+        # No active line — append one.
+        printf '\noutput * bg %s fill\n' "$wallpaper" >> "$PATH_SWAY_OUTPUT"
+    fi
 }
 
 apply_sway_theme() {
