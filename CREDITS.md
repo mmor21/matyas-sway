@@ -22,6 +22,21 @@ The script `scripts/rofi_bluetooth` is adapted from
 - firecat53 (networkmanager-dmenu)
 - x70b1 (polybar-scripts bluetooth module)
 
+## Third-party applications used
+
+These are external tools the config relies on, not files in this repo:
+
+- **nwg-dock** by Piotr Miller (nwg-piotr) — the bottom dock
+  (https://github.com/nwg-piotr/nwg-dock)
+- **rofi** by Dave Davenport and contributors — the launcher and menu
+  framework (https://github.com/davatorium/rofi)
+- **Waybar** by Alexays and contributors — the status bar
+  (https://github.com/Alexays/Waybar)
+- **Mako** by Simon Ser (emersion) — the notification daemon
+  (https://github.com/emersion/mako)
+- **sway** by the swaywm team — the compositor
+  (https://github.com/swaywm/sway)
+
 ## Parts rewritten or replaced
 
 - All per-file copyright headers (removed)
