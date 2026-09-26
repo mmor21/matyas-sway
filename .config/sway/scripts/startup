@@ -70,3 +70,9 @@ if ! pidof xfce-polkit >/dev/null 2>&1 && \
     done
 fi
 
+## Dock -----------------------------------------------------------
+## nwg-dock in resident mode. Starts hidden; toggled with $mod+Alt+Space
+## (see config.d/matyas.conf). Launcher button opens rofi drun.
+run nwg-dock -r -i 42 \
+    -s "$HOME/.config/sway/nwg-dock/style.css" \
+    -c "rofi -show drun -theme $HOME/.config/sway/rofi/launcher.rasi"
