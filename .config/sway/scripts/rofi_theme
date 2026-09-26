@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi theme menu
+## Bound to: $mod+Ctrl+t
+##
+## Three theme modes:
+##   Default  — base16-ocean (dark)
+##   Light    — light palette
+##   Pywal    — generate colorscheme from a random wallpaper
+##              (requires pywal to be installed)
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/theme.rasi"
+THEME_SH="$DIR/theme/theme.sh"
+
+prompt="Theme"
+mesg="Current: $(cat "$DIR/theme/.mode_state" 2>/dev/null || echo 'dark')"
+
+option_1='Default (base16-ocean)'
+option_2='Light'
+option_3='Pywal (from wallpaper)'
+
+rofi_cmd() {
+    rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
+}
+
+run_rofi() {
+    printf '%s\n' "$option_1" "$option_2" "$option_3" | rofi_cmd
+}
+
+chosen="$(run_rofi)"
+case "$chosen" in
+    "$option_1") exec "$THEME_SH" --default ;;
+    "$option_2") exec "$THEME_SH" --light ;;
+    "$option_3") exec "$THEME_SH" --pywal ;;
+esac
