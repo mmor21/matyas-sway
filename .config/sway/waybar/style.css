@@ -8,7 +8,7 @@
 
 * {
     font-family: "Noto Sans Mono", "Symbols Nerd Font", sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     border: none;
     border-radius: 0;
     min-height: 0;
@@ -29,9 +29,10 @@ window#waybar.hidden {
 
 #workspaces,
 #idle_inhibitor,
+#backlight,
 #clock,
 #pulseaudio,
-#backlight,
+
 #network,
 #bluetooth,
 #battery,
@@ -67,6 +68,7 @@ window#waybar.hidden {
 #workspaces button.focused {
     background-color: @selected;
     color: @background;
+    font-weight: bold;
 }
 
 #workspaces button.urgent {
@@ -89,16 +91,19 @@ window#waybar.hidden {
 
 #idle_inhibitor {
     color: @green;
+    font-weight: bold;
 }
 
 #idle_inhibitor.activated {
     color: @red;
+    font-weight: bold;
 }
 
 /* ─── PulseAudio ──────────────────────────────────────────────── */
 
 #pulseaudio {
     color: @magenta;
+    font-weight: bold;
 }
 
 #pulseaudio.muted {
@@ -109,12 +114,14 @@ window#waybar.hidden {
 
 #backlight {
     color: @yellow;
+    font-weight: bold;
 }
 
 /* ─── Network ─────────────────────────────────────────────────── */
 
 #network {
     color: @green;
+    font-weight: bold;
 }
 
 #network.disconnected,
@@ -126,6 +133,7 @@ window#waybar.hidden {
 
 #bluetooth {
     color: @blue;
+    font-weight: bold;
 }
 
 #bluetooth.disabled,
@@ -141,6 +149,7 @@ window#waybar.hidden {
 
 #battery {
     color: @green;
+    font-weight: bold;
 }
 
 #battery.charging,

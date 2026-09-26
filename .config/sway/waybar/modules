@@ -37,6 +37,20 @@
         },
         "timeout": 30
     },
+ 
+ 
+ // ─── Backlight ─────────────────────────────────────────────
+    "backlight": {
+        "interval": 2,
+        "align": 0,
+        "rotate": 0,
+        "format": "{icon}Backlight {percent}%",
+        "format-icons": ["", "", "", ""],
+        "on-click": "",
+        "on-scroll-up":   "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-",
+        "smooth-scrolling-threshold": 1
+    },
 
     // ─── Clock ─────────────────────────────────────────────────
     // Left-click toggles time/date.
@@ -51,7 +65,7 @@
         "calendar": {
             "mode": "month",
             "mode-mon-col": 3,
-            "weeks-pos": "right",
+            "weeks-pos": "left",
             "on-scroll": 1,
             "format": {
                 "months":   "<span color='#c0c5ce'><b>{}</b></span>",
@@ -67,7 +81,7 @@
 
     // ─── PulseAudio ────────────────────────────────────────────
     "pulseaudio": {
-        "format": "{icon} {volume}%",
+        "format": "{icon}Vol {volume}%",
         "format-muted": " Mute",
         "format-bluetooth": " {volume}%",
         "format-bluetooth-muted": " Mute",
@@ -88,20 +102,7 @@
         "smooth-scrolling-threshold": 1
     },
 
-    // ─── Backlight ─────────────────────────────────────────────
-    "backlight": {
-        "interval": 2,
-        "align": 0,
-        "rotate": 0,
-        "format": "{icon} {percent}%",
-        "format-icons": ["", "", "", ""],
-        "on-click": "",
-        "on-scroll-up":   "brightnessctl set 5%+",
-        "on-scroll-down": "brightnessctl set 5%-",
-        "smooth-scrolling-threshold": 1
-    },
-
-    // ─── Network ───────────────────────────────────────────────
+     // ─── Network ───────────────────────────────────────────────
     "network": {
         "interval": 5,
         "format-wifi":         " {essid}",
@@ -116,11 +117,11 @@
 
     // ─── Bluetooth ─────────────────────────────────────────────
     "bluetooth": {
-        "format":             " {status}",
-        "format-on":          " {status}",
-        "format-off":         " {status}",
+        "format":             "BT:{status}",
+        "format-on":          "BT:{status}",
+        "format-off":         "BT:{status}",
         "format-disabled":    " {status}",
-        "format-connected":   " {device_alias}",
+        "format-connected":   "BT:{device_alias}",
         "format-connected-battery": " {device_alias}, {device_battery_percentage}%",
         "tooltip": true,
         "tooltip-format": "{controller_alias}\t{controller_address}",
