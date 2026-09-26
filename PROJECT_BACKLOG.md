@@ -27,9 +27,9 @@ Enhancements and polish, after Phase 3.x closes.
 
 | ID | Item | Priority |
 |----|------|----------|
-| 2.6 | Overview tool (SOV / exposway / "windows") | High |
+| 2.6 | Overview tool / window switcher | ✅ Done — custom `rofi_windows` script bound to `Alt+Tab` |
 | 2.7 | Dock for Sway (nwg-dock, sfwbar, etc.) | High |
-| 2.9 | Letter workspace labels (`A B C ... J`) — coupled with 2.6 | High |
+| 2.9 | Letter workspace labels (`A B C ... J`) — coupled with 2.6 | Superseded — overview landed, no letters needed |
 | 2.4 | Wallpaper picker menu | Medium-High |
 | 2.5 | `pywal` install path (`python-pywal16` AUR / pip / alternative) | Medium-High |
 | 2.1 | Waybar modules review (wifi redundancy, `Super+N` network keybind) | Low |
@@ -38,10 +38,9 @@ Enhancements and polish, after Phase 3.x closes.
 
 ### Recommended MVP 2 sequence
 
-1. **2.6 and 2.7 first** — the big functional additions; new dependencies that must be known before the installer is built
-2. **2.4 and 2.5 next** — user-facing features
-3. **2.1, 2.2, 2.10 after** — cleanup and polish
-4. **2.9 last** — depends on 2.6 landing first
+1. **2.7 next** — the remaining big functional addition; new dependencies that must be known before the installer is built
+2. **2.4 and 2.5 after** — user-facing features
+3. **2.1, 2.2, 2.10 last** — cleanup and polish
 
 ---
 

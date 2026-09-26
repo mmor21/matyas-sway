@@ -1,0 +1,114 @@
+/***** Configuration *****/
+configuration {
+    show-icons: true;
+}
+
+/***** Global Properties *****/
+@import "shared/colors.rasi"
+@import "shared/fonts.rasi"
+
+window {
+    transparency:    "real";
+    location:        center;
+    anchor:          center;
+    fullscreen:      false;
+    width:           700px;
+    x-offset:        0px;
+    y-offset:        0px;
+    margin:          0px;
+    padding:         0px;
+    border:          2px solid;
+    border-radius:   8px;
+    border-color:    @background-alt;
+    cursor:          "default";
+    background-color: @background;
+}
+
+mainbox {
+    enabled:         true;
+    spacing:         10px;
+    margin:          0px;
+    padding:         20px;
+    background-color: transparent;
+    children:        [ "inputbar", "listview" ];
+}
+
+inputbar {
+    enabled:         true;
+    spacing:         10px;
+    margin:          0px;
+    padding:         10px;
+    border:          0px;
+    border-radius:   8px;
+    background-color: @background-alt;
+    text-color:      @foreground;
+    children:        [ "prompt", "entry" ];
+}
+
+prompt {
+    enabled:         true;
+    padding:         0px 10px 0px 0px;
+    background-color: transparent;
+    text-color:      @foreground;
+    markup:          true;
+}
+
+entry {
+    enabled:         true;
+    padding:         0px;
+    background-color: transparent;
+    text-color:      @foreground;
+    cursor:          text;
+    placeholder:     "Filter…";
+    placeholder-color: @foreground;
+}
+
+listview {
+    enabled:         true;
+    columns:         1;
+    lines:           12;
+    cycle:           true;
+    dynamic:         true;
+    scrollbar:       false;
+    layout:          vertical;
+    spacing:         4px;
+    background-color: transparent;
+    cursor:          "default";
+}
+
+element {
+    enabled:         true;
+    padding:         8px 12px;
+    border:          0px solid;
+    border-radius:   6px;
+    background-color: transparent;
+    text-color:      @foreground;
+    cursor:          pointer;
+}
+
+element-icon {
+    background-color: transparent;
+    text-color:      inherit;
+    size:            24px;
+    cursor:          inherit;
+}
+
+element-text {
+    font:            "Noto Sans Mono 11";
+    background-color: transparent;
+    text-color:      inherit;
+    cursor:          inherit;
+    vertical-align:  0.5;
+    horizontal-align: 0.0;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: var(background);
+    text-color:      var(foreground);
+}
+
+element selected.normal {
+    background-color: var(selected);
+    text-color:      var(background);
+}

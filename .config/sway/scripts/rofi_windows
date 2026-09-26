@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+## Matyas Sway — Rofi window switcher
+##
+## Lists all windows across all workspaces with app icons. Selecting
+## an entry focuses that window.
+##
+## Uses rofi's -format 'i' to get the selected index. Because pipes
+## spawn subshells, the con_id → index mapping is written to a temp
+## file rather than kept in a bash array.
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/swayr.rasi"
+
+TMP_MAP="$(mktemp)"
+trap 'rm -f "$TMP_MAP"' EXIT
+
+find_icon() {
+    # Case-insensitive search across several icon themes and sizes.
+    # Prefers larger sizes for better rendering in the menu.
+    local app_id="$1"
+    local short="${app_id##*.}"
+    local name size theme candidate
+
+    for name in "$app_id" "$short"; do
+        [[ -z "$name" ]] && continue
+        for theme in hicolor Papirus Adwaita; do
+            for size in 128x128 64x64 48x48 32x32 scalable; do
+                candidate="/usr/share/icons/${theme}/${size}/apps/${name}"
+                for ext in png svg; do
+                    if [[ -f "${candidate}.${ext}" ]]; then
+                        echo "${candidate}.${ext}"
+                        return
+                    fi
+                done
+            done
+        done
+        # Fallback: case-insensitive find, scoped to this candidate name
+        candidate="$(find /usr/share/icons -maxdepth 4 -ipath "*/apps/${name}.*" 2>/dev/null | head -1)"
+        if [[ -n "$candidate" ]]; then
+            echo "$candidate"
+            return
+        fi
+    done
+}
+
+short_name() {
+    echo "${1##*.}"
+}
+
+build_list() {
+    while IFS=$'\t' read -r con_id app_id title ws; do
+        [[ -z "$con_id" ]] && continue
+
+        # Record the mapping: one con_id per line, in display order.
+        printf '%s\n' "$con_id" >> "$TMP_MAP"
+
+        local icon name short_title
+        icon="$(find_icon "$app_id")"
+        name="$(short_name "$app_id")"
+        short_title="$title"
+        if (( ${#short_title} > 60 )); then
+            short_title="${short_title:0:57}…"
+        fi
+
+        printf '<span alpha="45000">[%s]</span> <i>%s</i> — %s' \
+            "$ws" "$name" "$short_title"
+
+        if [[ -n "$icon" ]]; then
+            printf '\0icon\x1f%s' "$icon"
+        fi
+
+        printf '\n'
+    done < <(swaymsg -t get_tree | jq -r '
+        .. | objects
+        | select(.type=="workspace") | .name as $ws
+        | .nodes[]?, .floating_nodes[]?
+        | .. | objects
+        | select(.app_id != null)
+        | "\(.id)\t\(.app_id)\t\(.name // "untitled")\t\($ws)"
+    ')
+}
+
+index="$(build_list | rofi -dmenu -i -markup-rows -click-to-exit -me-select-entry "" -me-accept-entry MousePrimary -format 'i' -theme "$RASI" -p "Windows")"
+
+[[ -z "$index" ]] && exit 0
+
+# rofi -format 'i' returns a 0-based index; temp file is 1-based lines.
+con_id="$(sed -n "$((index + 1))p" "$TMP_MAP")"
+
+[[ -z "$con_id" ]] && exit 1
+
+swaymsg "[con_id=$con_id] focus"
