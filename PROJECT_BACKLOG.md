@@ -2,7 +2,7 @@
 
 Living document. Last updated: 2026-09-26.
 
-Order of work: **MVP 2 → Phase 4 (installer) → MVP 3**.
+Order of work: **MVP 2 → Ghostty migration → Phase 4 (installer) → MVP 3**.
 The installer is deliberately built last, against a frozen config,
 so its dependency list doesn't need to be maintained incrementally.
 
@@ -17,7 +17,7 @@ Fixes and small enhancements discovered during integration testing.
 | 3.1 | Calendar tooltip colors — make `theme.sh` rewrite the literal hex values | Bug | ✅ Done |
 | 3.2 | Bind `theme.sh --default`, `--light`, `--pywal` to keybinds | Enhancement | ✅ Done (3.10, via rofi menu) |
 | 3.3 | Waybar modules — strip remaining Nerd Font glyphs, replace with text labels | Bug | ✅ Done (verified clean) |
-| 3.4 | Ghostty migration — replace Kitty as primary terminal | Enhancement | P2 |
+| 3.4 | Ghostty migration — replace Kitty as primary terminal | Enhancement | Deferred to pre-installer phase |
 
 ---
 
