@@ -19,6 +19,7 @@ THEME_DIR="$SWAY_DIR/theme"
 PATH_SWAY_THEME="$SWAY_DIR/sway-theme"
 PATH_SWAY_OUTPUT="$SWAY_DIR/sway-output"
 PATH_WAYBAR_COLORS="$SWAY_DIR/waybar/colors.css"
+PATH_WAYBAR_MODULES="$SWAY_DIR/waybar/modules"
 PATH_ROFI_COLORS="$SWAY_DIR/rofi/shared/colors.rasi"
 PATH_MAKO="$SWAY_DIR/mako/config"
 PATH_KITTY="$SWAY_DIR/kitty/colors.conf"
@@ -184,6 +185,23 @@ apply_waybar() {
 	EOF
 }
 
+apply_waybar_modules() {
+    # Rewrite the calendar span colors in waybar/modules to match the
+    # current theme. Delegates to waybar-calendar.py, which validates
+    # the file as JSONC before and after the transformation and leaves
+    # the original untouched if anything goes wrong.
+    #
+    # Optional argument: --dry-run (prints result, does not write).
+    local DRY=""
+    if [[ "${1:-}" == "--dry-run" ]]; then
+        DRY="--dry-run"
+    fi
+
+    "$SWAY_DIR/theme/waybar-calendar.py" $DRY \
+        "$PATH_WAYBAR_MODULES" \
+        "$foreground" "$color6" "$color3" "$color4" "$background"
+}
+
 apply_rofi() {
     write_if_changed "$PATH_ROFI_COLORS" <<-EOF
 		/* Matyas Sway — Rofi shared colors
@@ -291,6 +309,7 @@ esac
 apply_wallpaper &
 apply_sway_theme &
 apply_waybar &
+apply_waybar_modules &
 apply_rofi &
 apply_kitty &
 apply_gtk &
