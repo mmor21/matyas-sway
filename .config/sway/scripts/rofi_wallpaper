@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+## Matyas Sway — Wallpaper picker
+##
+## Lists image files in ~/.config/backgrounds/ with thumbnails.
+## Selecting one sets it as the current wallpaper via theme.sh.
+
+set -euo pipefail
+
+DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/wallpaper.rasi"
+BG_DIR="$HOME/.config/backgrounds"
+THEME_SH="$DIR/theme/theme.sh"
+
+# Mapping: index → wallpaper path. Written to a temp file because
+# pipes spawn subshells and arrays don't propagate out.
+TMP_MAP="$(mktemp)"
+trap 'rm -f "$TMP_MAP"' EXIT
+
+build_list() {
+    local file
+    for file in "$BG_DIR"/*.{jpg,jpeg,png,webp,bmp}; do
+        [[ -f "$file" ]] || continue
+
+        printf '%s\n' "$file" >> "$TMP_MAP"
+
+        local name
+        name="$(basename "$file")"
+
+        # Visible text, then the null-byte icon separator, then newline.
+        printf '<b>%s</b>' "$name"
+        printf '\0icon\x1f%s' "$file"
+        printf '\n'
+    done
+}
+
+index="$(build_list | rofi -dmenu -i -markup-rows -format 'i' \
+    -me-select-entry "" -me-accept-entry MousePrimary \
+    -theme "$RASI" -p "Wallpaper")"
+
+# Empty = Escape
+[[ -z "$index" ]] && exit 0
+
+wallpaper="$(sed -n "$((index + 1))p" "$TMP_MAP")"
+[[ -z "$wallpaper" ]] && exit 1
+
+"$THEME_SH" --wallpaper "$wallpaper"
