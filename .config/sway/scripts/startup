@@ -71,7 +71,7 @@ if ! pidof xfce-polkit >/dev/null 2>&1 && \
 fi
 
 ## Dock -----------------------------------------------------------
-## nwg-dock in resident mode. Starts hidden; toggled with $mod+Alt+Space
+## nwg-dock in resident mode. Starts hidden; toggled with $Alt+x
 ## (see config.d/matyas.conf). Launcher button opens rofi drun.
 ## CSS is read from ~/.config/nwg-dock/style.css (nwg-dock's fixed
 ## lookup path). The installer copies the repo's copy there.
