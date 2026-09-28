@@ -56,12 +56,12 @@ exec_always ~/.config/sway/scripts/startup
 ##-- Keybindings -------------------------
 
 # -- Terminal --
-bindsym $mod+Return          exec $kitty
+#bindsym $mod+Return          exec $kitty
 bindsym $mod+Shift+Return    exec $kitty -f
 bindsym $mod+$alt+Return     exec $kitty -F
 
 # -- GUI Apps --
-bindsym $mod+Shift+f         exec $files
+#bindsym $mod+Shift+f         exec $files
 bindsym $mod+Shift+w         exec $browser
 
 # -- Rofi --
@@ -112,7 +112,7 @@ bindsym $mod+Shift+t layout tabbed,          exec notify-send -u low "Layout - T
 bindsym $mod+Shift+d layout default,         exec notify-send -u low "Layout - Default"
 bindsym $mod+Shift+l layout toggle,          exec notify-send -u low "Cycling Layouts"
 bindsym $mod+Shift+v layout toggle split,    exec notify-send -u low "Layout - Hor/Vert"
-bindsym $mod+f       fullscreen toggle,      exec notify-send -u low "Toggled Fullscreen"
+#bindsym $mod+f       fullscreen toggle,      exec notify-send -u low "Toggled Fullscreen"
 bindsym $mod+space   floating toggle,        exec notify-send -u low "Toggled Floating Mode"
 
 # Focusing
