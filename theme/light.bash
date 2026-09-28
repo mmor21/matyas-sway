@@ -25,7 +25,6 @@ color14='#9d6c7c'
 color15='#22221b'
 
 # Wallpaper
-wallpaper="$HOME/.config/backgrounds/wallpaper-light.jpg"
 
 # GTK / icon / cursor theme
 gtk_theme='Adwaita'

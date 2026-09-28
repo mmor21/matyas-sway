@@ -292,12 +292,33 @@ apply_gtk() {
 
 ##─ Dispatch ───────────────────────────────────────────────────────
 
+set_wallpaper_only() {
+    # Set a specific wallpaper without touching the palette.
+    # Called as: theme.sh --wallpaper /path/to/image.jpg
+    local new_wallpaper="$1"
+
+    if [[ ! -f "$new_wallpaper" ]]; then
+        notify "Wallpaper not found: $new_wallpaper"
+        exit 1
+    fi
+
+    if grep -q "^output \* bg" "$PATH_SWAY_OUTPUT"; then
+        sed -i "s|^output \* bg.*|output * bg $new_wallpaper fill|" "$PATH_SWAY_OUTPUT"
+    else
+        printf '\noutput * bg %s fill\n' "$new_wallpaper" >> "$PATH_SWAY_OUTPUT"
+    fi
+
+    swaymsg reload 2>/dev/null || true
+    notify "Wallpaper updated."
+}
+
 case "${1:-}" in
-    --default) source_default ;;
-    --light)   source_light ;;
-    --pywal)   source_pywal ;;
+    --default)   source_default ;;
+    --light)     source_light ;;
+    --pywal)     source_pywal ;;
+    --wallpaper) set_wallpaper_only "${2:-}"; exit 0 ;;
     *)
-        echo "Usage: theme.sh --default | --light | --pywal" >&2
+        echo "Usage: theme.sh --default | --light | --pywal | --wallpaper PATH" >&2
         exit 1
         ;;
 esac
@@ -306,7 +327,6 @@ esac
 ## Everything that just writes files runs in parallel, then we wait.
 ## UI reloads (mako, waybar) run last to avoid flicker.
 
-apply_wallpaper &
 apply_sway_theme &
 apply_waybar &
 apply_waybar_modules &
