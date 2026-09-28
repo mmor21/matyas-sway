@@ -2,36 +2,41 @@
 ## Matyas Sway — Rofi theme menu
 ## Bound to: $mod+Ctrl+t
 ##
-## Three theme modes:
-##   Default  — base16-ocean (dark)
-##   Light    — light palette
-##   Pywal    — generate colorscheme from a random wallpaper
-##              (requires pywal to be installed)
+## Four entries:
+##   Change Wallpaper  — opens the wallpaper picker
+##   Dark theme        — base16-ocean (default)
+##   Light theme       — Measured Light
+##   IC Orange PPL     — matches the Ghostty theme of the same name
 
 set -euo pipefail
 
 DIR="$HOME/.config/sway"
 RASI="$DIR/rofi/theme.rasi"
 THEME_SH="$DIR/theme/theme.sh"
+WALLPAPER_PICKER="$DIR/scripts/rofi_wallpaper"
 
 prompt="Theme"
-mesg="Current: $(cat "$DIR/theme/.mode_state" 2>/dev/null || echo 'dark')"
+mesg="Pick an option"
 
-option_1='Default (base16-ocean)'
-option_2='Light'
-option_3='Pywal (from wallpaper)'
+option_1='Change Wallpaper'
+option_2='Dark theme'
+option_3='Light theme'
+option_4='IC Orange PPL'
 
 rofi_cmd() {
-    rofi -dmenu -p "$prompt" -mesg "$mesg" -markup-rows -theme "$RASI"
+    rofi -dmenu -i -markup-rows \
+        -me-select-entry "" -me-accept-entry MousePrimary \
+        -p "$prompt" -mesg "$mesg" -theme "$RASI"
 }
 
 run_rofi() {
-    printf '%s\n' "$option_1" "$option_2" "$option_3" | rofi_cmd
+    printf '%s\n' "$option_1" "$option_2" "$option_3" "$option_4" | rofi_cmd
 }
 
 chosen="$(run_rofi)"
 case "$chosen" in
-    "$option_1") exec "$THEME_SH" --default ;;
-    "$option_2") exec "$THEME_SH" --light ;;
-    "$option_3") exec "$THEME_SH" --pywal ;;
+    "$option_1") exec "$WALLPAPER_PICKER" ;;
+    "$option_2") exec "$THEME_SH" --dark ;;
+    "$option_3") exec "$THEME_SH" --light ;;
+    "$option_4") exec "$THEME_SH" --orange ;;
 esac

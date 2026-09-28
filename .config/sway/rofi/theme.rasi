@@ -54,7 +54,7 @@ textbox {
 listview {
     enabled:         true;
     columns:         1;
-    lines:           3;
+    lines:           4;
     cycle:           true;
     scrollbar:       false;
     layout:          vertical;
