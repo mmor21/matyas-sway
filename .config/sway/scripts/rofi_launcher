@@ -5,4 +5,4 @@
 DIR="$HOME/.config/sway"
 RASI="$DIR/rofi/launcher.rasi"
 
-exec rofi -show drun -theme "$RASI"
+exec rofi -show drun -me-select-entry "" -me-accept-entry MousePrimary -theme "$RASI"
