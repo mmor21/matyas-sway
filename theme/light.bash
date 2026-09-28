@@ -1,30 +1,29 @@
 # Matyas Sway — Light theme
-# Base16-Atelier-Estuary-inspired light palette
+# Base16 Measured Light by Measured (measured.co)
+# Designed for accessible color contrast.
 
 # Core colors
-background='#f4f3ec'
-foreground='#22221b'
-cursor='#22221b'
+background='#fdf9f5'
+foreground='#292929'
+cursor='#292929'
 
 # Base16 slots
-color0='#22221b'
-color1='#ba6236'
-color2='#7d9726'
-color3='#a5980d'
-color4='#36a166'
-color5='#5f9182'
-color6='#9d6c7c'
-color7='#f4f3ec'
-color8='#6c6b5a'
-color9='#ba6236'
-color10='#7d9726'
-color11='#a5980d'
-color12='#36a166'
-color13='#5f9182'
-color14='#9d6c7c'
-color15='#22221b'
-
-# Wallpaper
+color0='#fdf9f5'
+color1='#ac1f35'
+color2='#0c680c'
+color3='#645a00'
+color4='#0158ad'
+color5='#6645c2'
+color6='#01716f'
+color7='#292929'
+color8='#5a5a5a'
+color9='#ac1f35'
+color10='#0c680c'
+color11='#645a00'
+color12='#0158ad'
+color13='#6645c2'
+color14='#01716f'
+color15='#000000'
 
 # GTK / icon / cursor theme
 gtk_theme='Adwaita'

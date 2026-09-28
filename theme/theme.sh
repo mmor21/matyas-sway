@@ -25,8 +25,9 @@ PATH_MAKO="$SWAY_DIR/mako/config"
 PATH_KITTY="$SWAY_DIR/kitty/colors.conf"
 
 CURRENT="$THEME_DIR/current.bash"
-DEFAULT="$THEME_DIR/default.bash"
+DARK="$THEME_DIR/dark.bash"
 LIGHT="$THEME_DIR/light.bash"
+ORANGE="$THEME_DIR/orange.bash"
 PYWAL="$HOME/.cache/wal/colors.sh"
 
 ##─ Helpers ────────────────────────────────────────────────────────
@@ -81,14 +82,14 @@ notify() {
 
 ##─ Palette loaders ────────────────────────────────────────────────
 
-source_default() {
-    cp "$DEFAULT" "$CURRENT"
+source_dark() {
+    cp "$DARK" "$CURRENT"
     # shellcheck disable=SC1090
     source "$CURRENT"
     altbackground="$(lighten "$background")"
     altforeground="$(darken "$foreground")"
     accent="$color4"
-    notify "Applying Default Theme…"
+    notify "Applying Dark Theme…"
 }
 
 source_light() {
@@ -99,6 +100,16 @@ source_light() {
     altforeground="$(lighten "$foreground")"
     accent="$color4"
     notify "Applying Light Theme…"
+}
+
+source_orange() {
+    cp "$ORANGE" "$CURRENT"
+    # shellcheck disable=SC1090
+    source "$CURRENT"
+    altbackground="$(lighten "$background")"
+    altforeground="$(darken "$foreground")"
+    accent="$color4"
+    notify "Applying IC Orange Theme…"
 }
 
 source_pywal() {
@@ -313,12 +324,13 @@ set_wallpaper_only() {
 }
 
 case "${1:-}" in
-    --default)   source_default ;;
+    --dark)      source_dark ;;
     --light)     source_light ;;
+    --orange)    source_orange ;;
     --pywal)     source_pywal ;;
     --wallpaper) set_wallpaper_only "${2:-}"; exit 0 ;;
     *)
-        echo "Usage: theme.sh --default | --light | --pywal | --wallpaper PATH" >&2
+        echo "Usage: theme.sh --dark | --light | --orange | --pywal | --wallpaper PATH" >&2
         exit 1
         ;;
 esac
