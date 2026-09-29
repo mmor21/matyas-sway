@@ -1,13 +1,176 @@
 #!/usr/bin/env bash
-## Matyas Sway — Network menu (via networkmanager_dmenu)
-## Bound to: $mod+n
+## Matyas Sway — Rofi network menu
+##
+## Replicates the nm-applet menu in rofi style. Nested menus via a
+## mode argument:
+##   rofi_network            → top menu
+##   rofi_network --wifi     → available Wi-Fi networks submenu
+##   rofi_network --vpn      → VPN connections submenu
+##
+## Backend: nmcli.
+
+set -euo pipefail
 
 DIR="$HOME/.config/sway"
-CONFIG="$DIR/rofi/networkmenu_config.ini"
+MODE="${1:-}"
 
-if ! command -v networkmanager_dmenu >/dev/null 2>&1; then
-    notify-send -u normal "networkmanager_dmenu is not installed."
-    exit 1
+notify() {
+    notify-send -u low "$1"
+}
+
+## ── Helpers ─────────────────────────────────────────────────────
+
+wifi_device() {
+    nmcli -t -f DEVICE,TYPE device status | awk -F: '$2=="wifi"{print $1; exit}'
+}
+
+wifi_state() {
+    nmcli radio wifi
+}
+
+wifi_current() {
+    nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2=="802-11-wireless"{print $1; exit}'
+}
+
+wifi_networking_state() {
+    nmcli networking
+}
+
+## ── Rofi invocation ─────────────────────────────────────────────
+
+rofi_menu() {
+    local prompt="$1"
+    local mesg="$2"
+    rofi -dmenu -i -markup-rows \
+        -me-select-entry "" -me-accept-entry MousePrimary \
+        -p "$prompt" -mesg "$mesg" \
+        -theme "$DIR/rofi/swayr.rasi"
+}
+
+## ── Mode: available Wi-Fi networks ──────────────────────────────
+##
+## Cache behavior: by default, uses cached scan results for instant
+## response. Signal strength may be slightly stale. Selecting
+## "Rescan networks" forces a fresh scan (2-5 second wait).
+
+if [[ "$MODE" == "--wifi" || "$MODE" == "--rescan" ]]; then
+
+    # Force a scan when explicitly requested.
+    if [[ "$MODE" == "--rescan" ]]; then
+        nmcli device wifi rescan 2>/dev/null || true
+        sleep 2
+    fi
+
+    list="$(nmcli -t -f SSID,SIGNAL,SECURITY,FREQ device wifi list --rescan no | \
+        awk -F: 'NF>=3 && $1!="" {
+            key=$1
+            if (!(key in seen) || $2 > seen[key]) {
+                seen[key]=$2
+                sec[key]=$3
+                freq[key]=$4
+            }
+        }
+        END {
+            for (k in seen) print seen[k] "\t" k "\t" sec[k] "\t" freq[k]
+        }' | sort -rn | \
+        awk -F'\t' '{
+            band = ($4 >= 5000) ? "5GHz" : "2.4GHz"
+            sec = $3
+            if (sec == "") sec = "open"
+            printf "%3d%%  %-24s %-12s %s\n", $1, $2, sec, band
+        }')"
+
+    [[ -z "$list" ]] && { notify "No networks found."; exit 0; }
+
+    # Prepend the rescan entry.
+    rescan_label="↻ Rescan networks"
+    menu="$(printf '%s\n%s\n' "$rescan_label" "$list")"
+
+    choice="$(printf '%s\n' "$menu" | rofi -dmenu -i -markup-rows \
+        -me-select-entry "" -me-accept-entry MousePrimary \
+        -p "Wi-Fi" -mesg "Click a network to connect" \
+        -theme "$DIR/rofi/swayr.rasi")"
+    [[ -z "$choice" ]] && exit 0
+
+    # Rescan was chosen.
+    if [[ "$choice" == "$rescan_label" ]]; then
+        exec "$0" --rescan
+    fi
+
+    # Extract SSID: format is " 92%  SSID                      WPA2         5GHz"
+    ssid="$(echo "$choice" | awk '{ $1=""; sub(/^ +/, ""); for (i=1; i<=NF; i++) { if ($i ~ /^(WPA|WEP|open|802)/ || $i ~ /GHz/) break; ssid = ssid (ssid?" ":"") $i } print ssid }')"
+    [[ -z "$ssid" ]] && exit 0
+
+    if nmcli device wifi connect "$ssid" 2>/dev/null; then
+        notify "Connected to $ssid"
+    else
+        notify "Could not connect to $ssid"
+    fi
+    exit 0
 fi
 
-exec networkmanager_dmenu --config "$CONFIG"
+## ── Mode: VPN ───────────────────────────────────────────────────
+
+if [[ "$MODE" == "--vpn" ]]; then
+    vpns="$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2 ~ /vpn|wireguard/ {print $1}')"
+    [[ -z "$vpns" ]] && { notify "No VPN connections configured."; exit 0; }
+
+    choice="$(printf '%s\n' "$vpns" | rofi_menu "VPN" "VPN connections")"
+    [[ -z "$choice" ]] && exit 0
+
+    if nmcli connection up "$choice" 2>/dev/null; then
+        notify "VPN up: $choice"
+    else
+        notify "Could not bring up VPN: $choice"
+    fi
+    exit 0
+fi
+
+## ── Default: top menu ───────────────────────────────────────────
+
+current_wifi="$(wifi_current)"
+wifi_radio="$(wifi_state)"
+networking="$(wifi_networking_state)"
+
+option_status="Current: ${current_wifi:-not connected}"
+option_disconnect="Disconnect"
+option_avail="Available networks…"
+option_hidden="Connect to hidden network…"
+option_create="Create new Wi-Fi network…"
+option_vpn="VPN Connections…"
+option_enable_wifi="Wi-Fi: $wifi_radio"
+option_enable_net="Networking: $networking"
+option_info="Connection Information"
+option_edit="Edit Connections…"
+
+# Build the menu — the first line is a status header (non-selectable
+# looking but rofi doesn't truly support that, so we let it be picked
+# and treat picking it as a no-op).
+menu_entries="$(printf '%s\n' \
+    "$option_status" \
+    "$option_disconnect" \
+    "$option_avail" \
+    "$option_hidden" \
+    "$option_create" \
+    "$option_vpn" \
+    "$option_enable_wifi" \
+    "$option_enable_net" \
+    "$option_info" \
+    "$option_edit")"
+
+choice="$(printf '%s\n' "$menu_entries" | rofi_menu "Network" "Network Manager")"
+[[ -z "$choice" ]] && exit 0
+
+case "$choice" in
+    "$option_status")       exit 0 ;;
+    "$option_disconnect")   nmcli connection down "$current_wifi" 2>/dev/null && notify "Disconnected" ;;
+    "$option_avail")        exec "$0" --wifi ;;
+    "$option_hidden")       notify "Hidden network: not implemented yet" ;;
+    "$option_create")       notify "Create hotspot: not implemented yet" ;;
+    "$option_vpn")          exec "$0" --vpn ;;
+    "$option_enable_wifi")  if [[ "$wifi_radio" == "enabled" ]]; then nmcli radio wifi off; else nmcli radio wifi on; fi ;;
+    "$option_enable_net")   if [[ "$networking" == "enabled" ]]; then nmcli networking off; else nmcli networking on; fi ;;
+    "$option_info")         notify "Connection info: not implemented yet" ;;
+    "$option_edit")         nm-connection-editor & ;;
+    *)                      exit 0 ;;
+esac
