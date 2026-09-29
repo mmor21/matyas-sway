@@ -25,16 +25,16 @@ Fixes and small enhancements discovered during integration testing.
 
 Enhancements and polish, after Phase 3.x closes.
 
-| ID | Item | Priority |
-|----|------|----------|
-| 2.6 | Overview tool / window switcher | ✅ Done — custom `rofi_windows` script bound to `Alt+Tab` |
-| 2.7 | Dock for Sway (nwg-dock, sfwbar, etc.) | High |
-| 2.9 | Letter workspace labels (`A B C ... J`) — coupled with 2.6 | Superseded — overview landed, no letters needed |
-| 2.4 | Wallpaper picker menu | Medium-High |
-| 2.5 | `pywal` install path (`python-pywal16` AUR / pip / alternative) | Medium-High |
-| 2.1 | Waybar modules revamp (groups, clipboard, network + BT menus) | ✅ Done — 2.1a–2.1k |
-| 2.2 | `Fil...` truncation on launcher mode-switcher button | Low |
-| 2.10 | Network + Bluetooth menu styling consistency | Low |
+| ID | Item | Status |
+|----|------|--------|
+| 2.1 | Waybar modules revamp (groups, clipboard, network + BT menus) | ✅ Done — 2.1a–2.1l |
+| 2.2 | Single-click on launcher and screenshot menus | ✅ Done |
+| 2.4 | Wallpaper picker + theme menu + palettes | ✅ Done — 2.4a–2.4e |
+| 2.5 | `pywal` install path | ❌ Dropped — pywal not applicable to our workflow |
+| 2.6 | Window switcher | ✅ Done — custom `rofi_windows` script bound to `Alt+Tab` |
+| 2.7 | Dock for Sway | ✅ Done — nwg-dock, bottom-center, translucent |
+| 2.9 | Letter workspace labels | ❌ Superseded — overview landed, no letters needed |
+| 2.10 | Network + Bluetooth menu styling consistency | ✅ Done — both menus rewritten with dedicated `.rasi` files |
 
 ### Recommended MVP 2 sequence
 
