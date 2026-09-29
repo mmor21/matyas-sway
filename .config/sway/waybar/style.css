@@ -37,12 +37,17 @@ window#waybar.hidden {
 #bluetooth,
 #battery,
 #tray,
-#custom-power {
+#custom-power,
+#custom-clipboard {
     background-color: @background-alt;
     color: @foreground;
     border-radius: 8px;
     margin: 6px 2px;
     padding: 2px 10px;
+}
+
+#custom-clipboard {
+    font-weight: bold;
 }
 
 /* ─── Workspaces ──────────────────────────────────────────────── */

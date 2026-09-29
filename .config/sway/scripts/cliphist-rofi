@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+## Matyas Sway — cliphist helper for rofi's custom-mode interface
+##
+## Called by rofi in two ways:
+##   - no arguments: print the list of entries (with image thumbnails
+##     referenced as \0icon\x1f<path> for image entries)
+##   - with an entry as argument: decode and copy that entry
+##
+## Designed for rofi's -modi mode: rofi calls this script to get the
+## list, and calls it again with the selected entry.
+
+set -euo pipefail
+
+MAX_ENTRIES=25
+THUMB_DIR="/tmp/cliphist-thumbs"
+
+## ── Action mode: called with an entry as argument ────────────────
+if [[ $# -gt 0 ]]; then
+    printf '%s' "$1" | cliphist decode | wl-copy
+    exit 0
+fi
+
+## ── List mode: print entries, one per line ───────────────────────
+mkdir -p "$THUMB_DIR"
+
+while IFS=$'\t' read -r id preview; do
+    [[ -z "$id" ]] && continue
+
+    # Peek at the entry type. If it's an image, save a thumbnail.
+    if cliphist decode "$id" 2>/dev/null | file - | grep -q 'image data'; then
+        thumb="$THUMB_DIR/$id.png"
+        if [[ ! -f "$thumb" ]]; then
+            cliphist decode "$id" > "$thumb" 2>/dev/null || continue
+        fi
+        # Print the entry with its icon separator.
+        printf '%s\t%s\0icon\x1f%s\n' "$id" "$preview" "$thumb"
+    else
+        # Text entry — no icon.
+        printf '%s\t%s\n' "$id" "$preview"
+    fi
+done < <(cliphist list | head -n "$MAX_ENTRIES")

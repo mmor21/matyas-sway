@@ -79,6 +79,7 @@ run nwg-dock -r -i 42 \
     -c "rofi -show drun -theme $HOME/.config/sway/rofi/launcher.rasi"
 
 ## Clipboard history ----------------------------------------------
-## Stores every clipboard change into cliphist. Read back via
-## custom/clipboard in the Waybar config or $mod+Shift+V.
+## Two watchers: one for text, one for images. cliphist stores both.
+## Read back via custom/clipboard in the Waybar config or $mod+Shift+V.
 run_bg wl-paste --watch cliphist store
+run_bg wl-paste --type image --watch cliphist store

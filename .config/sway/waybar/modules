@@ -164,5 +164,13 @@
         "format": "⏻",
         "tooltip": false,
         "on-click": "~/.config/sway/scripts/rofi_powermenu"
+    },
+
+    // ─── Custom: clipboard history ─────────────────────────────
+    "custom/clipboard": {
+        "format": "Clip",
+        "tooltip": true,
+        "tooltip-format": "Clipboard history",
+        "on-click": "~/.config/sway/scripts/rofi_clipboard"
     }
 }

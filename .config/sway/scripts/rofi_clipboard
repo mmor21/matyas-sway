@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 ## Matyas Sway — Clipboard history via rofi + cliphist
 ##
-## Shows the most recent clipboard entries. Selecting one copies it
-## back to the clipboard.
+## Uses rofi's custom-mode interface. The cliphist-rofi helper script
+## provides the entry list and handles the selection action.
 
 set -euo pipefail
 
 DIR="$HOME/.config/sway"
 RASI="$DIR/rofi/launcher.rasi"
-MAX_ENTRIES=50
+HELPER="$DIR/scripts/cliphist-rofi"
 
 # If history is empty, notify and exit cleanly.
 if [[ -z "$(cliphist list | head -1)" ]]; then
@@ -16,12 +16,7 @@ if [[ -z "$(cliphist list | head -1)" ]]; then
     exit 0
 fi
 
-# Pipe the most recent entries to rofi.
-chosen="$(cliphist list | head -n "$MAX_ENTRIES" | \
-    rofi -dmenu -i -me-select-entry "" -me-accept-entry MousePrimary \
-    -p "Clipboard" -theme "$RASI")"
-
-[[ -z "$chosen" ]] && exit 0
-
-# Decode and copy the selected entry to the clipboard.
-printf '%s' "$chosen" | cliphist decode | wl-copy
+# rofi custom-mode: the helper is called for both list and action.
+exec rofi -modi "clipboard:$HELPER" -show clipboard -show-icons \
+    -i -me-select-entry "" -me-accept-entry MousePrimary \
+    -theme "$RASI"
