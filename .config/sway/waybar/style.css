@@ -39,7 +39,12 @@ window#waybar.hidden {
 #tray,
 #custom-power,
 #custom-clipboard,
-#custom-av-label {
+#custom-av-label,
+#custom-sys-label,
+#temperature,
+#memory,
+#cpu,
+#disk {
     background-color: @background-alt;
     color: @foreground;
     border-radius: 8px;
@@ -209,6 +214,14 @@ window#waybar.hidden {
     color: @background;
 }
 
-#custom-av-label {
+#custom-av-label,
+#custom-sys-label {
+    font-weight: bold;
+}
+
+#temperature,
+#memory,
+#cpu,
+#disk {
     font-weight: bold;
 }
