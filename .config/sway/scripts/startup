@@ -80,6 +80,7 @@ run nwg-dock -r -i 42 \
 
 ## Clipboard history ----------------------------------------------
 ## Two watchers: one for text, one for images. cliphist stores both.
+## Storage capped at 25 entries — the same number shown in the menu.
 ## Read back via custom/clipboard in the Waybar config or $mod+Shift+V.
-run_bg wl-paste --watch cliphist store
-run_bg wl-paste --type image --watch cliphist store
+run_bg wl-paste --watch cliphist -max-items 25 store
+run_bg wl-paste --type image --watch cliphist -max-items 25 store
