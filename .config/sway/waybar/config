@@ -28,5 +28,5 @@
 
     "modules-left":   ["sway/workspaces", "idle_inhibitor", "group/av"],
     "modules-center": ["custom/clipboard", "clock"],
-    "modules-right":  ["group/sys", "network", "bluetooth", "battery", "tray", "custom/power"]
+    "modules-right":  ["group/sys", "group/wi-bt", "battery", "tray", "custom/power"]
 }

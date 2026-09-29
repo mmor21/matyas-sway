@@ -41,6 +41,9 @@ window#waybar.hidden {
 #custom-clipboard,
 #custom-av-label,
 #custom-sys-label,
+#custom-wi-bt-label,
+#custom-wifi,
+#custom-bt,
 #temperature,
 #memory,
 #cpu,
@@ -89,6 +92,18 @@ window#waybar.hidden {
 
 #workspaces button.persistent {
     color: @foreground-alt;
+}
+
+/* ─── Wi-BT children ──────────────────────────────────────────── */
+
+#custom-wifi {
+    color: @yellow;
+    font-weight: bold;
+}
+
+#custom-bt {
+    color: @magenta;
+    font-weight: bold;
 }
 
 /* ─── Clock ───────────────────────────────────────────────────── */
@@ -215,7 +230,10 @@ window#waybar.hidden {
 }
 
 #custom-av-label,
-#custom-sys-label {
+#custom-sys-label,
+#custom-wi-bt-label,
+#custom-wifi,
+#custom-bt {
     font-weight: bold;
 }
 

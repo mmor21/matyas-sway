@@ -173,6 +173,37 @@
         "tooltip": true
     },
 
+    // ─── Wi-BT group (Wi-Fi + Bluetooth menus) ─────────────────
+    "custom/wi-bt-label": {
+        "format": "Wi-BT",
+        "tooltip": false,
+        "on-click": ""
+    },
+
+    "custom/wifi": {
+        "format": "Wi-Fi",
+        "tooltip": true,
+        "tooltip-format": "Network menu",
+        "on-click": "~/.config/sway/scripts/rofi_network"
+    },
+
+    "custom/bt": {
+        "format": "BT",
+        "tooltip": true,
+        "tooltip-format": "Bluetooth menu",
+        "on-click": "~/.config/sway/scripts/rofi_bluetooth"
+    },
+
+    "group/wi-bt": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 200,
+            "children-class": "wi-bt-child",
+            "transition-left-to-right": false
+        },
+        "modules": ["custom/wi-bt-label", "custom/wifi", "custom/bt"]
+    },
+
     // ─── Sys group ─────────────────────────────────────────────
     "custom/sys-label": {
         "format": "Sys",
