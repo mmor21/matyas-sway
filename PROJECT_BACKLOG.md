@@ -32,7 +32,7 @@ Enhancements and polish, after Phase 3.x closes.
 | 2.9 | Letter workspace labels (`A B C ... J`) — coupled with 2.6 | Superseded — overview landed, no letters needed |
 | 2.4 | Wallpaper picker menu | Medium-High |
 | 2.5 | `pywal` install path (`python-pywal16` AUR / pip / alternative) | Medium-High |
-| 2.1 | Waybar modules review (wifi redundancy, `Super+N` network keybind) | Low |
+| 2.1 | Waybar modules revamp (groups, clipboard, network + BT menus) | ✅ Done — 2.1a–2.1k |
 | 2.2 | `Fil...` truncation on launcher mode-switcher button | Low |
 | 2.10 | Network + Bluetooth menu styling consistency | Low |
 
