@@ -40,6 +40,26 @@
  
  
  // ─── Backlight ─────────────────────────────────────────────
+    // ─── Custom: AV group leader (label only) ─────────────────
+    // Waybar groups show their leader in both collapsed and expanded
+    // states. This is a minimal placeholder to display "AV".
+    "custom/av-label": {
+        "format": "AV",
+        "tooltip": false,
+        "on-click": ""
+    },
+
+    // ─── Group: AV (backlight + volume) ───────────────────────
+    "group/av": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 200,
+            "children-class": "av-child",
+            "transition-left-to-right": false
+        },
+        "modules": ["custom/av-label", "backlight", "pulseaudio"]
+    },
+
     "backlight": {
         "interval": 2,
         "align": 0,

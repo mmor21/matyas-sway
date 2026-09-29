@@ -26,7 +26,7 @@
     "fixed-center": true,
     "ipc": true,
 
-    "modules-left":   ["sway/workspaces", "idle_inhibitor", "backlight"],
+    "modules-left":   ["sway/workspaces", "idle_inhibitor", "group/av"],
     "modules-center": ["custom/clipboard", "clock"],
-    "modules-right":  ["pulseaudio", "network", "bluetooth", "battery", "tray", "custom/power"]
+    "modules-right":  ["network", "bluetooth", "battery", "tray", "custom/power"]
 }

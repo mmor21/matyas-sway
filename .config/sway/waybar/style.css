@@ -38,7 +38,8 @@ window#waybar.hidden {
 #battery,
 #tray,
 #custom-power,
-#custom-clipboard {
+#custom-clipboard,
+#custom-av-label {
     background-color: @background-alt;
     color: @foreground;
     border-radius: 8px;
@@ -206,4 +207,8 @@ window#waybar.hidden {
 #custom-power:hover {
     background-color: @red;
     color: @background;
+}
+
+#custom-av-label {
+    font-weight: bold;
 }
