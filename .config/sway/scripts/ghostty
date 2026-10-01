@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+## Matyas Sway — Ghostty terminal launcher
+##
+## Thin wrapper. Ghostty reads its config from ~/.config/ghostty/
+## (conventional path, populated by the installer from our repo).
+
+exec ghostty "$@"

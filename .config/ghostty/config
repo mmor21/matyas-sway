@@ -1,0 +1,19 @@
+## Matyas Sway — Ghostty configuration
+##
+## Split into three files for consistency with the rest of the config:
+##   config  — this file (settings that rarely change)
+##   colors  — theme-managed, rewritten by theme.sh
+##   fonts   — static font settings
+
+config-file = ~/.config/ghostty/colors
+config-file = ~/.config/ghostty/fonts
+
+## Cursor
+cursor-style = block
+
+## Window padding
+window-padding-x = 10
+window-padding-y = 5
+
+## Transparency
+background-opacity = 0.88

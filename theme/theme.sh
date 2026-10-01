@@ -23,6 +23,7 @@ PATH_WAYBAR_MODULES="$SWAY_DIR/waybar/modules"
 PATH_ROFI_COLORS="$SWAY_DIR/rofi/shared/colors.rasi"
 PATH_MAKO="$SWAY_DIR/mako/config"
 PATH_KITTY="$SWAY_DIR/kitty/colors.conf"
+PATH_GHOSTTY="$HOME/.config/ghostty/colors"
 
 CURRENT="$THEME_DIR/current.bash"
 DARK="$THEME_DIR/dark.bash"
@@ -291,6 +292,36 @@ apply_kitty() {
     pkill -USR1 kitty 2>/dev/null || true
 }
 
+apply_ghostty() {
+    write_if_changed "$PATH_GHOSTTY" <<-EOF
+		## Matyas Sway — Ghostty colors
+		## Overwritten by theme.sh.
+
+		background = $background
+		foreground = $foreground
+		cursor-color = $foreground
+		selection-background = $foreground
+		selection-foreground = $background
+
+		palette = 0=$color0
+		palette = 1=$color1
+		palette = 2=$color2
+		palette = 3=$color3
+		palette = 4=$color4
+		palette = 5=$color5
+		palette = 6=$color6
+		palette = 7=$color7
+		palette = 8=$color8
+		palette = 9=$color9
+		palette = 10=$color10
+		palette = 11=$color11
+		palette = 12=$color12
+		palette = 13=$color13
+		palette = 14=$color14
+		palette = 15=$color15
+	EOF
+}
+
 apply_gtk() {
     sed -i "$PATH_SWAY_THEME" \
         -e "s|^set \$sway_gtk_theme.*|set \$sway_gtk_theme    $gtk_theme|" \
@@ -344,6 +375,7 @@ apply_waybar &
 apply_waybar_modules &
 apply_rofi &
 apply_kitty &
+apply_ghostty &
 apply_gtk &
 wait
 
