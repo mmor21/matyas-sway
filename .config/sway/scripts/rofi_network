@@ -4,173 +4,209 @@
 ## Replicates the nm-applet menu in rofi style. Nested menus via a
 ## mode argument:
 ##   rofi_network            → top menu
-##   rofi_network --wifi     → available Wi-Fi networks submenu
-##   rofi_network --vpn      → VPN connections submenu
+##   rofi_network --wifi     → available Wi-Fi networks (cached scan)
+##   rofi_network --rescan   → same, after a fresh scan
+##   rofi_network --vpn      → VPN / WireGuard connections (toggle)
 ##
 ## Backend: nmcli.
 
-set -euo pipefail
+set -uo pipefail
 
 DIR="$HOME/.config/sway"
+RASI="$DIR/rofi/swayr.rasi"
 MODE="${1:-}"
 
-notify() {
-    notify-send -u low "$1"
-}
+notify() { notify-send -u low "$@" 2>/dev/null || true; }
 
 ## ── Helpers ─────────────────────────────────────────────────────
 
-wifi_device() {
-    nmcli -t -f DEVICE,TYPE device status | awk -F: '$2=="wifi"{print $1; exit}'
+# rofi_menu <prompt> <mesg> [extra rofi args…]   (no markup: SSIDs and
+# connection names are arbitrary text, so -markup-rows would break on &,<)
+rofi_menu() {
+    local prompt="$1" mesg="$2"; shift 2
+    rofi -dmenu -i \
+        -me-select-entry "" -me-accept-entry MousePrimary \
+        -p "$prompt" -mesg "$mesg" -theme "$RASI" "$@"
 }
 
-wifi_state() {
-    nmcli radio wifi
+# rofi_input <prompt> [--password]
+rofi_input() {
+    local -a pwopt=()
+    [[ "${2:-}" == --password ]] && pwopt=(-password)
+    rofi -dmenu -p "$1" -theme "$RASI" -theme-str 'listview { enabled: false; }' "${pwopt[@]}" < /dev/null
+}
+
+# nmcli -t escapes ":" and "\" inside fields. Always put the free-text
+# field (SSID / NAME) LAST, then this takes "the rest of the line".
+unescape() { local s=${1//\\:/:}; printf '%s' "${s//\\\\/\\}"; }
+
+wifi_device() {
+    nmcli -t -f TYPE,DEVICE device status | awk -F: '$1=="wifi"{print $2; exit}'
 }
 
 wifi_current() {
-    nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2=="802-11-wireless"{print $1; exit}'
+    local line
+    line="$(nmcli -t -f TYPE,NAME connection show --active | grep -m1 '^802-11-wireless:')" || return 0
+    unescape "${line#802-11-wireless:}"
 }
 
-wifi_networking_state() {
-    nmcli networking
+# Run an nmcli command; notify with nmcli's own error text on failure.
+nm_run() {
+    local ok_msg="$1" fail_msg="$2" err; shift 2
+    if err="$(nmcli "$@" 2>&1 >/dev/null)"; then
+        [[ -n "$ok_msg" ]] && notify "$ok_msg"
+        return 0
+    fi
+    notify "$fail_msg" "${err#Error: }"
+    return 1
 }
 
-## ── Rofi invocation ─────────────────────────────────────────────
+# connect_wifi <ssid> <security> [hidden]
+connect_wifi() {
+    local ssid="$1" sec="$2" hidden="${3:-}" pw="" dev
+    dev="$(wifi_device)"
+    local -a extra=()
+    [[ -n "$dev" ]] && extra+=(ifname "$dev")
+    [[ "$hidden" == hidden ]] && extra+=(hidden yes)
 
-rofi_menu() {
-    local prompt="$1"
-    local mesg="$2"
-    rofi -dmenu -i -markup-rows \
-        -me-select-entry "" -me-accept-entry MousePrimary \
-        -p "$prompt" -mesg "$mesg" \
-        -theme "$DIR/rofi/swayr.rasi"
+    # A saved profile already holds the secret; open networks need none.
+    if nmcli -t -f NAME connection show | sed 's/\\:/:/g' | grep -qxF -- "$ssid"; then
+        nm_run "Connected to $ssid" "Could not connect to $ssid" \
+            --wait 30 connection up id "$ssid"
+        return
+    fi
+    if [[ "$sec" != open ]]; then
+        pw="$(rofi_input "Password for $ssid" --password)" || return 0
+        [[ -z "$pw" ]] && return 0
+        extra+=(password "$pw")
+    fi
+    if ! nm_run "Connected to $ssid" "Could not connect to $ssid" \
+            --wait 30 device wifi connect "$ssid" "${extra[@]}"; then
+        # A failed first attempt leaves a profile with the wrong secret;
+        # remove it, or the next try would reuse it without asking again.
+        nmcli connection delete id "$ssid" >/dev/null 2>&1 || true
+    fi
 }
 
 ## ── Mode: available Wi-Fi networks ──────────────────────────────
-##
-## Cache behavior: by default, uses cached scan results for instant
-## response. Signal strength may be slightly stale. Selecting
-## "Rescan networks" forces a fresh scan (2-5 second wait).
 
 if [[ "$MODE" == "--wifi" || "$MODE" == "--rescan" ]]; then
-
-    # Force a scan when explicitly requested.
+    rescan=no
     if [[ "$MODE" == "--rescan" ]]; then
-        nmcli device wifi rescan 2>/dev/null || true
-        sleep 2
+        rescan=yes          # makes nmcli wait for the scan to finish
+        notify "Scanning for networks…"
     fi
 
-    list="$(nmcli -t -f SSID,SIGNAL,SECURITY,FREQ device wifi list --rescan no | \
-        awk -F: 'NF>=3 && $1!="" {
-            key=$1
-            if (!(key in seen) || $2 > seen[key]) {
-                seen[key]=$2
-                sec[key]=$3
-                freq[key]=$4
-            }
-        }
-        END {
-            for (k in seen) print seen[k] "\t" k "\t" sec[k] "\t" freq[k]
-        }' | sort -rn | \
-        awk -F'\t' '{
-            band = ($4 >= 5000) ? "5GHz" : "2.4GHz"
-            sec = $3
-            if (sec == "") sec = "open"
-            printf "%3d%%  %-24s %-12s %s\n", $1, $2, sec, band
-        }')"
+    # Best signal per SSID, strongest first. Fields: IN-USE,SIGNAL,FREQ,SECURITY,SSID
+    declare -A sig=() sec=() band=() inuse=()
+    while IFS= read -r line; do
+        IFS=: read -r use signal freq security rest <<< "$line"
+        ssid="$(unescape "${line#"$use:$signal:$freq:$security:"}")"
+        [[ -z "$ssid" ]] && continue
+        if [[ -z "${sig[$ssid]+x}" ]] || (( signal > sig[$ssid] )); then
+            sig[$ssid]=$signal
+            sec[$ssid]=${security:-open}
+            band[$ssid]=$([[ "${freq%% *}" -ge 5000 ]] && echo 5GHz || echo 2.4GHz)
+        fi
+        [[ "$use" == "*" ]] && inuse[$ssid]=1
+    done < <(nmcli -t -f IN-USE,SIGNAL,FREQ,SECURITY,SSID device wifi list --rescan "$rescan" 2>/dev/null)
 
-    [[ -z "$list" ]] && { notify "No networks found."; exit 0; }
+    (( ${#sig[@]} )) || { notify "No networks found."; exit 0; }
 
-    # Prepend the rescan entry.
-    rescan_label="↻ Rescan networks"
-    menu="$(printf '%s\n%s\n' "$rescan_label" "$list")"
+    ssids=(); rows=()
+    while IFS=$'\t' read -r _ ssid; do
+        mark="  "; [[ -n "${inuse[$ssid]+x}" ]] && mark="● "
+        ssids+=("$ssid")
+        rows+=("$(printf '%s%3d%%  %-24s %-12s %s' "$mark" "${sig[$ssid]}" "$ssid" "${sec[$ssid]}" "${band[$ssid]}")")
+    done < <(for s in "${!sig[@]}"; do printf '%03d\t%s\n' "${sig[$s]}" "$s"; done | sort -r)
 
-    choice="$(printf '%s\n' "$menu" | rofi -dmenu -i -markup-rows \
-        -me-select-entry "" -me-accept-entry MousePrimary \
-        -p "Wi-Fi" -mesg "Click a network to connect" \
-        -theme "$DIR/rofi/swayr.rasi")"
-    [[ -z "$choice" ]] && exit 0
+    # Row 0 is the rescan entry; network i is at row i+1.
+    idx="$(printf '%s\n' "↻ Rescan networks" "${rows[@]}" | \
+        rofi_menu "Wi-Fi" "Select a network to connect" -format i)" || exit 0
+    [[ "$idx" =~ ^[0-9]+$ ]] || exit 0
+    (( idx == 0 )) && exec "$0" --rescan
 
-    # Rescan was chosen.
-    if [[ "$choice" == "$rescan_label" ]]; then
-        exec "$0" --rescan
-    fi
-
-    # Extract SSID: format is " 92%  SSID                      WPA2         5GHz"
-    ssid="$(echo "$choice" | awk '{ $1=""; sub(/^ +/, ""); for (i=1; i<=NF; i++) { if ($i ~ /^(WPA|WEP|open|802)/ || $i ~ /GHz/) break; ssid = ssid (ssid?" ":"") $i } print ssid }')"
-    [[ -z "$ssid" ]] && exit 0
-
-    if nmcli device wifi connect "$ssid" 2>/dev/null; then
-        notify "Connected to $ssid"
-    else
-        notify "Could not connect to $ssid"
-    fi
+    ssid="${ssids[idx-1]}"
+    connect_wifi "$ssid" "${sec[$ssid]}"
     exit 0
 fi
 
 ## ── Mode: VPN ───────────────────────────────────────────────────
 
 if [[ "$MODE" == "--vpn" ]]; then
-    vpns="$(nmcli -t -f NAME,TYPE connection show | awk -F: '$2 ~ /vpn|wireguard/ {print $1}')"
-    [[ -z "$vpns" ]] && { notify "No VPN connections configured."; exit 0; }
+    uuids=(); names=(); active=(); rows=()
+    while IFS= read -r line; do
+        IFS=: read -r type act uuid _ <<< "$line"
+        [[ "$type" == vpn || "$type" == wireguard ]] || continue
+        name="$(unescape "${line#"$type:$act:$uuid:"}")"
+        uuids+=("$uuid"); names+=("$name"); active+=("$act")
+        rows+=("$([[ "$act" == yes ]] && echo "● $name   (connected)" || echo "  $name")")
+    done < <(nmcli -t -f TYPE,ACTIVE,UUID,NAME connection show)
 
-    choice="$(printf '%s\n' "$vpns" | rofi_menu "VPN" "VPN connections")"
-    [[ -z "$choice" ]] && exit 0
+    (( ${#uuids[@]} )) || { notify "No VPN connections configured."; exit 0; }
 
-    if nmcli connection up "$choice" 2>/dev/null; then
-        notify "VPN up: $choice"
+    idx="$(printf '%s\n' "${rows[@]}" | rofi_menu "VPN" "Select to connect / disconnect" -format i)" || exit 0
+    [[ "$idx" =~ ^[0-9]+$ ]] || exit 0
+
+    if [[ "${active[idx]}" == yes ]]; then
+        nm_run "VPN down: ${names[idx]}" "Could not stop VPN: ${names[idx]}" connection down uuid "${uuids[idx]}"
     else
-        notify "Could not bring up VPN: $choice"
+        nm_run "VPN up: ${names[idx]}" "Could not bring up VPN: ${names[idx]}" --wait 30 connection up uuid "${uuids[idx]}"
     fi
     exit 0
 fi
 
 ## ── Default: top menu ───────────────────────────────────────────
 
+dev="$(wifi_device)"
 current_wifi="$(wifi_current)"
-wifi_radio="$(wifi_state)"
-networking="$(wifi_networking_state)"
+wifi_radio="$(nmcli radio wifi)"
+networking="$(nmcli networking)"
 
 option_status="Current: ${current_wifi:-not connected}"
 option_disconnect="Disconnect"
 option_avail="Available networks…"
 option_hidden="Connect to hidden network…"
-option_create="Create new Wi-Fi network…"
+option_create="Create Wi-Fi hotspot…"
 option_vpn="VPN Connections…"
 option_enable_wifi="Wi-Fi: $wifi_radio"
 option_enable_net="Networking: $networking"
 option_info="Connection Information"
 option_edit="Edit Connections…"
 
-# Build the menu — the first line is a status header (non-selectable
-# looking but rofi doesn't truly support that, so we let it be picked
-# and treat picking it as a no-op).
-menu_entries="$(printf '%s\n' \
-    "$option_status" \
-    "$option_disconnect" \
-    "$option_avail" \
-    "$option_hidden" \
-    "$option_create" \
-    "$option_vpn" \
-    "$option_enable_wifi" \
-    "$option_enable_net" \
-    "$option_info" \
-    "$option_edit")"
+entries=("$option_status")
+[[ -n "$current_wifi" ]] && entries+=("$option_disconnect")
+entries+=("$option_avail" "$option_hidden" "$option_create" "$option_vpn"
+          "$option_enable_wifi" "$option_enable_net" "$option_info" "$option_edit")
 
-choice="$(printf '%s\n' "$menu_entries" | rofi_menu "Network" "Network Manager")"
-[[ -z "$choice" ]] && exit 0
+choice="$(printf '%s\n' "${entries[@]}" | rofi_menu "Network" "Network Manager")" || exit 0
 
 case "$choice" in
-    "$option_status")       exit 0 ;;
-    "$option_disconnect")   nmcli connection down "$current_wifi" 2>/dev/null && notify "Disconnected" ;;
-    "$option_avail")        exec "$0" --wifi ;;
-    "$option_hidden")       notify "Hidden network: not implemented yet" ;;
-    "$option_create")       notify "Create hotspot: not implemented yet" ;;
-    "$option_vpn")          exec "$0" --vpn ;;
-    "$option_enable_wifi")  if [[ "$wifi_radio" == "enabled" ]]; then nmcli radio wifi off; else nmcli radio wifi on; fi ;;
-    "$option_enable_net")   if [[ "$networking" == "enabled" ]]; then nmcli networking off; else nmcli networking on; fi ;;
-    "$option_info")         notify "Connection info: not implemented yet" ;;
-    "$option_edit")         nm-connection-editor & ;;
-    *)                      exit 0 ;;
+    "$option_status")      exit 0 ;;
+    "$option_disconnect")
+        # Like nm-applet: disconnect the device (also stops auto-reconnect).
+        nm_run "Disconnected" "Could not disconnect" device disconnect "$dev" ;;
+    "$option_avail")       exec "$0" --wifi ;;
+    "$option_hidden")
+        ssid="$(rofi_input "Hidden SSID")" || exit 0
+        [[ -n "$ssid" ]] && connect_wifi "$ssid" secured hidden ;;
+    "$option_create")
+        ssid="$(rofi_input "Hotspot name")" || exit 0
+        [[ -z "$ssid" ]] && exit 0
+        pw="$(rofi_input "Password (min. 8 chars)" --password)" || exit 0
+        if (( ${#pw} < 8 )); then notify "Hotspot" "Password must be at least 8 characters."; exit 0; fi
+        nm_run "Hotspot \"$ssid\" started" "Could not start hotspot" \
+            device wifi hotspot ifname "$dev" ssid "$ssid" password "$pw" ;;
+    "$option_vpn")         exec "$0" --vpn ;;
+    "$option_enable_wifi")
+        if [[ "$wifi_radio" == enabled ]]; then nmcli radio wifi off; else nmcli radio wifi on; fi ;;
+    "$option_enable_net")
+        if [[ "$networking" == enabled ]]; then nmcli networking off; else nmcli networking on; fi ;;
+    "$option_info")
+        info_dev="$(nmcli -t -f DEVICE,STATE device status | awk -F: '$2=="connected"{print $1; exit}')"
+        if [[ -z "$info_dev" ]]; then notify "Not connected."; exit 0; fi
+        notify "Connection: $info_dev" "$(nmcli -t -g GENERAL.CONNECTION,IP4.ADDRESS,IP4.GATEWAY,IP4.DNS device show "$info_dev" \
+            | sed '1s^/^/Name: /;2s^/^/IP: /;3s^/^/Gateway: /;4,$s^/^/DNS: /')" ;;
+    "$option_edit")        nm-connection-editor >/dev/null 2>&1 & ;;
 esac
+exit 0
