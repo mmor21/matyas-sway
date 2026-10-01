@@ -1,41 +1,60 @@
 #!/usr/bin/env bash
-## Matyas Sway — cliphist helper for rofi's custom-mode interface
+## Matyas Sway — cliphist helper for rofi's script mode
 ##
-## Called by rofi in two ways:
-##   - no arguments: print the list of entries (with image thumbnails
-##     referenced as \0icon\x1f<path> for image entries)
-##   - with an entry as argument: decode and copy that entry
-##
-## Designed for rofi's -modi mode: rofi calls this script to get the
-## list, and calls it again with the selected entry.
+## rofi -modi "clipboard:cliphist-rofi" calls this script:
+##   ROFI_RETV=0        → print the entry list (images get a thumbnail
+##                        via \0icon\x1f<path>)
+##   ROFI_RETV=1 + $1   → copy the selected entry and close
+##   ROFI_RETV=10 + $1  → kb-custom-1 (bound to Shift+Delete in
+##                        rofi_clipboard): delete the entry and show the
+##                        refreshed list, keeping the cursor position
+## Anything typed that doesn't match an entry is ignored (no-custom).
+## The "<id>\t" prefix stays in the entry (cliphist needs it) but is
+## hidden with the "display" row option.
 
 set -euo pipefail
 
 MAX_ENTRIES=25
-THUMB_DIR="/tmp/cliphist-thumbs"
+THUMB_DIR="${XDG_RUNTIME_DIR:-/tmp}/cliphist-thumbs"   # private, per-user tmpfs
 
-## ── Action mode: called with an entry as argument ────────────────
-if [[ $# -gt 0 ]]; then
-    printf '%s' "$1" | cliphist decode | wl-copy
-    exit 0
-fi
+## ── Actions ──────────────────────────────────────────────────────
+case "${ROFI_RETV:-0}" in
+    1)  # wl-copy keeps running in the background to serve the clipboard;
+        # detach its stdio from rofi's pipe so rofi can close right away.
+        [[ -n "${1:-}" ]] && printf '%s' "$1" | cliphist decode | wl-copy >/dev/null 2>&1
+        exit 0 ;;
+    10) [[ -n "${1:-}" ]] && printf '%s' "$1" | cliphist delete
+        printf '\0keep-selection\x1ftrue\n' ;;
+esac
 
-## ── List mode: print entries, one per line ───────────────────────
-mkdir -p "$THUMB_DIR"
+## ── List mode ────────────────────────────────────────────────────
+mkdir -p "$THUMB_DIR" && chmod 700 "$THUMB_DIR"
 
+printf '\0no-custom\x1ftrue\n'
+printf '\0use-hot-keys\x1ftrue\n'      # without this, kb-custom-1 never reaches us
+printf '\0message\x1fEnter: copy   Shift+Del: delete\n'
+
+declare -A keep=()
 while IFS=$'\t' read -r id preview; do
     [[ -z "$id" ]] && continue
-
-    # Peek at the entry type. If it's an image, save a thumbnail.
-    if cliphist decode "$id" 2>/dev/null | file - | grep -q 'image data'; then
-        thumb="$THUMB_DIR/$id.png"
-        if [[ ! -f "$thumb" ]]; then
-            cliphist decode "$id" > "$thumb" 2>/dev/null || continue
+    # cliphist already labels images, e.g. "[[ binary data 1.2 MiB png 1920x1080 ]]",
+    # so there's no need to decode every entry just to sniff its type.
+    if [[ "$preview" =~ ^\[\[\ binary\ data\ .*\ (png|jpe?g|webp|bmp|gif)\  ]]; then
+        # The preview (size + dimensions) is part of the name, so a reused
+        # id after "cliphist wipe" doesn't show an old thumbnail.
+        thumb="$THUMB_DIR/${id}-$(printf '%s' "$preview" | md5sum | cut -c1-8).${BASH_REMATCH[1]}"
+        keep[$thumb]=1
+        if [[ ! -s "$thumb" ]]; then
+            cliphist decode "$id" > "$thumb" 2>/dev/null || { rm -f "$thumb"; continue; }
         fi
-        # Print the entry with its icon separator.
-        printf '%s\t%s\0icon\x1f%s\n' "$id" "$preview" "$thumb"
+        printf '%s\t%s\0display\x1f%s\x1ficon\x1f%s\n' "$id" "$preview" "$preview" "$thumb"
     else
-        # Text entry — no icon.
-        printf '%s\t%s\n' "$id" "$preview"
+        printf '%s\t%s\0display\x1f%s\n' "$id" "$preview" "$preview"
     fi
-done < <(cliphist list | head -n "$MAX_ENTRIES")
+done < <(cliphist list | head -n "$MAX_ENTRIES" || true)
+
+# Drop thumbnails for entries that are no longer listed.
+shopt -s nullglob
+for f in "$THUMB_DIR"/*; do
+    [[ -n "${keep[$f]+x}" ]] || rm -f "$f"
+done

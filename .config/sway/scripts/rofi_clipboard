@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 ## Matyas Sway — Clipboard history via rofi + cliphist
 ##
-## Uses rofi's custom-mode interface. The cliphist-rofi helper script
-## provides the entry list and handles the selection action.
+## Uses rofi's script mode. The cliphist-rofi helper script
+## provides the entry list and handles copy / delete.
+##
+## Keys: Enter or click = copy, Shift+Delete = delete entry.
 
 set -euo pipefail
 
@@ -11,12 +13,16 @@ RASI="$DIR/rofi/launcher.rasi"
 HELPER="$DIR/scripts/cliphist-rofi"
 
 # If history is empty, notify and exit cleanly.
-if [[ -z "$(cliphist list | head -1)" ]]; then
-    notify-send -u low "Clipboard history is empty."
+if [[ -z "$(cliphist list 2>/dev/null | head -1)" ]]; then
+    notify-send -u low "Clipboard history is empty." 2>/dev/null || true
     exit 0
 fi
 
-# rofi custom-mode: the helper is called for both list and action.
+# Shift+Delete is rofi's kb-delete-entry by default, which script mode
+# doesn't use. Unbind it there and reuse it as kb-custom-1 (= delete).
+# element-icon enlarged to 48px for readable image thumbnails.
 exec rofi -modi "clipboard:$HELPER" -show clipboard -show-icons \
+    -display-clipboard "Clipboard" \
     -i -me-select-entry "" -me-accept-entry MousePrimary \
-    -theme "$RASI"
+    -kb-delete-entry "" -kb-custom-1 "Shift+Delete" \
+    -theme "$RASI" -theme-str 'element-icon { size: 48px; }'
