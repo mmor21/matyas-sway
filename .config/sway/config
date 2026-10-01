@@ -33,7 +33,7 @@ focus_on_window_activation smart
 show_marks yes
 
 ##-- Variables ---------------------------
-set $kitty            ~/.config/sway/scripts/kitty
+set $ghostty          ~/.config/sway/scripts/ghostty
 set $volume           ~/.config/sway/scripts/volume
 set $backlight        ~/.config/sway/scripts/brightness
 set $screenshot       ~/.config/sway/scripts/screenshot
@@ -56,9 +56,7 @@ exec_always ~/.config/sway/scripts/startup
 ##-- Keybindings -------------------------
 
 # -- Terminal --
-#bindsym $mod+Return          exec $kitty
-bindsym $mod+Shift+Return    exec $kitty -f
-bindsym $mod+$alt+Return     exec $kitty -F
+## Terminal keybindings live in config.d/matyas.conf ($mod+Return → ghostty)
 
 # -- GUI Apps --
 #bindsym $mod+Shift+f         exec $files
@@ -186,7 +184,6 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 ##-- Window rules -----------------------
 for_window [window_role="pop-up"]      floating enable
 for_window [window_role="task_dialog"] floating enable
-for_window [app_id="kitty-float"]      floating enable
 for_window [app_id="yad"]              floating enable
 for_window [app_id="pavucontrol"]      floating enable
 for_window [app_id="nm-connection-editor"] floating enable

@@ -10,7 +10,7 @@ USER_NAME="$(whoami)"
 
 prompt='Root'
 mesg='Run Applications As Root'
-term="kitty --class kitty-float --config $DIR/kitty/kitty.conf"
+term="$DIR/scripts/ghostty"
 
 option_1='Alacritty'
 option_2='Thunar'
