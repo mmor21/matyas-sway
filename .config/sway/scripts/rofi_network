@@ -13,7 +13,7 @@
 set -uo pipefail
 
 DIR="$HOME/.config/sway"
-RASI="$DIR/rofi/swayr.rasi"
+RASI="$DIR/rofi/list.rasi"
 MODE="${1:-}"
 
 notify() { notify-send -u low "$@" 2>/dev/null || true; }

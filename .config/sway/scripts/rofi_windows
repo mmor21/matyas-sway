@@ -7,7 +7,7 @@
 set -uo pipefail
 
 DIR="$HOME/.config/sway"
-RASI="$DIR/rofi/swayr.rasi"
+RASI="$DIR/rofi/list.rasi"
 
 # Pango-escape arbitrary text for -markup-rows.
 esc() {
