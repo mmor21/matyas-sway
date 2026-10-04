@@ -50,7 +50,6 @@ restart mako "$HOME/.config/sway/scripts/notifications"
 
 ##-- System applets ----------------------------------------------
 
-run nm-applet --indicator
 run mpd
 
 ##-- Polkit ------------------------------------------------------

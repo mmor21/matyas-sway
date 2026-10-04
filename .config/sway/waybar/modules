@@ -248,6 +248,33 @@
         "tooltip-format": "Disk: {used} / {total}"
     },
 
+    // ─── Network (status indicator) ───────────────────────────
+    "network": {
+        "interval": 5,
+        "format-wifi":         "\uf1eb",
+        "format-ethernet":     "\uf6ff",
+        "format-linked":       "\uf05e",
+        "format-disconnected": "\uf05e",
+        "format-disabled":     "\uf05e",
+        "tooltip-format":                "{ifname}",
+        "tooltip-format-wifi":           "{essid}  ({signalStrength}%)",
+        "tooltip-format-ethernet":       "{ifname}  ({ipaddr})",
+        "tooltip-format-disconnected":   "Disconnected"
+    },
+
+    // ─── Bluetooth (status indicator) ──────────────────────────
+    "bluetooth": {
+        "format":             "\uf293",
+        "format-on":          "\uf293",
+        "format-off":         "\uf00d",
+        "format-disabled":    "\uf00d",
+        "format-connected":   "\uf293",
+        "format-no-controller": "\uf00d",
+        "tooltip-format":                       "{controller_alias}",
+        "tooltip-format-connected":             "{controller_alias}\n{device_enumerate}",
+        "tooltip-format-enumerate-connected":   "{device_alias}"
+    },
+
     // ─── Tray ──────────────────────────────────────────────────
     "tray": {
         "icon-size": 16,
@@ -256,7 +283,7 @@
 
     // ─── Custom: power button ──────────────────────────────────
     "custom/power": {
-        "format": "⏻",
+        "format": "\uf011",
         "tooltip": false,
         "on-click": "~/.config/sway/scripts/rofi_powermenu"
     },

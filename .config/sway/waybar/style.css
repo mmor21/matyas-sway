@@ -7,7 +7,7 @@
 @import "./colors.css";
 
 * {
-    font-family: "Noto Sans Mono", "Symbols Nerd Font", sans-serif;
+    font-family: "Noto Sans Mono", "MesloLGSDZ Nerd Font Mono", "Symbols Nerd Font", sans-serif;
     font-size: 14px;
     border: none;
     border-radius: 0;
@@ -44,6 +44,8 @@ window#waybar.hidden {
 #custom-wi-bt-label,
 #custom-wifi,
 #custom-bt,
+#network,
+#bluetooth,
 #temperature,
 #memory,
 #cpu,
@@ -242,4 +244,34 @@ window#waybar.hidden {
 #cpu,
 #disk {
     font-weight: bold;
+}
+
+#network {
+    color: @green;
+    font-weight: bold;
+}
+
+#network.disconnected,
+#network.disabled {
+    color: @red;
+}
+
+#bluetooth {
+    color: @blue;
+    font-weight: bold;
+}
+
+#bluetooth.disabled,
+#bluetooth.off {
+    color: @red;
+}
+
+#bluetooth.connected {
+    color: @green;
+}
+
+#network,
+#bluetooth,
+#custom-power {
+    font-size: 20px;
 }
