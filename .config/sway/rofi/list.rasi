@@ -104,7 +104,7 @@ element-text {
 
 element normal.normal,
 element alternate.normal {
-    background-color: var(background);
+    background-color: var(background-alt);
     text-color:      var(foreground);
 }
 
