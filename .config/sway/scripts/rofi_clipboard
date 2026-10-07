@@ -9,7 +9,7 @@
 set -euo pipefail
 
 DIR="$HOME/.config/sway"
-RASI="$DIR/rofi/launcher.rasi"
+RASI="$DIR/rofi/clipboard.rasi"
 HELPER="$DIR/scripts/cliphist-rofi"
 
 # If history is empty, notify and exit cleanly.
