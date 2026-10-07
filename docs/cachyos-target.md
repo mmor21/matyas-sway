@@ -144,7 +144,7 @@ hyprpicker — NOT installed
 
 polkit-gnome — NOT installed (only polkit itself)
 
-networkmanager-dmenu — NOT installed
+networkmanager-dmenu — NOT installed and NOT required (we wrote our own `rofi_network` script using nmcli)
 
 spice-vdagent — installed (VM-specific; not present on bare metal)
 
@@ -228,7 +228,6 @@ Config locations outside ~/.config/sway/:
 
 ~/.config/nwg-dock/ (from repo .config/sway/nwg-dock/)
 
-~/.config/networkmanager-dmenu/ (unused now, no install needed)
 
 ~/.config/mimeapps.list (from repo .config/mimeapps.list)
 
