@@ -24,15 +24,18 @@ input type:pointer {
     pointer_accel 0.0
 }
 
-## Keyboard — default layout, US English
-## If you need a second layout, uncomment and adjust.
-input type:keyboard {
-    xkb_layout hu
-    # xkb_variant
-    # xkb_options grp:alt_shift_toggle
-    repeat_delay 300
-    repeat_rate 30
-}
+## Keyboard — layout is set in config.d/matyas.conf, not here.
+## The base config leaves the keyboard block out so Sway uses its
+## built-in default; personal layouts belong in the user override file.
+## The block below is a reference; uncomment only if you want a layout
+## in the base config itself.
+#input type:keyboard {
+#    xkb_layout us
+#    # xkb_variant
+#    # xkb_options grp:alt_shift_toggle
+#    repeat_delay 300
+#    repeat_rate 30
+#}
 
 
 ## Touch display (laptop panel)

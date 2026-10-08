@@ -48,10 +48,6 @@ restart waybar "$HOME/.config/sway/scripts/statusbar"
 # Mako via its wrapper
 restart mako "$HOME/.config/sway/scripts/notifications"
 
-##-- System applets ----------------------------------------------
-
-run mpd
-
 ##-- Polkit ------------------------------------------------------
 
 # Launch a polkit authentication agent so GUI apps can request
