@@ -10,10 +10,7 @@
 ##   --dark | --default   apply theme/dark.bash   (--default kept for lightmode)
 ##   --light              apply theme/light.bash
 ##   --orange             apply theme/orange.bash
-##   --pywal              generate a palette from a random wallpaper via pywal
 ##   --wallpaper PATH     set a wallpaper only, palette untouched
-##
-## The pywal mode requires the "wal" command to be installed.
 
 set -euo pipefail
 
@@ -29,7 +26,6 @@ PATH_MAKO="$SWAY_DIR/mako/config"
 PATH_GHOSTTY="$HOME/.config/ghostty/colors"
 
 CURRENT="$THEME_DIR/current.bash"
-PYWAL="$HOME/.cache/wal/colors.sh"
 
 ##─ Helpers ────────────────────────────────────────────────────────
 
@@ -93,41 +89,6 @@ load_palette() {
     if [[ -n "$label" ]]; then notify "$label"; fi
 }
 
-source_pywal() {
-    local wall_dir
-    wall_dir="$(xdg-user-dir PICTURES)/wallpapers"
-
-    if [[ ! -d "$wall_dir" ]]; then
-        mkdir -p "$wall_dir"
-        notify "Put some wallpapers in: $wall_dir"
-        exit 1
-    fi
-
-    local -a wallpapers
-    shopt -s nullglob nocaseglob
-    wallpapers=( "$wall_dir"/*.{jpg,jpeg,png,webp,bmp} )
-    shopt -u nullglob nocaseglob
-
-    if (( ${#wallpapers[@]} == 0 )); then
-        notify "There are no wallpapers in: $wall_dir"
-        exit 1
-    fi
-
-    if ! command -v wal >/dev/null 2>&1; then
-        notify "'pywal' is not installed."
-        exit 1
-    fi
-
-    notify "Generating colorscheme. Please wait..."
-    wal -q -n -s -t -e -i "$wall_dir"
-
-    # Trim FZF color block (some wal versions append it and it breaks source)
-    sed '/# FZF colors/Q' "$PYWAL" > "$CURRENT.tmp"
-    load_palette "$CURRENT.tmp" dark ""
-    rm -f "$CURRENT.tmp"
-    # pywal's colors.sh defines $wallpaper; the static palettes don't.
-}
-
 ##─ Per-component appliers ─────────────────────────────────────────
 
 # set_bg_line <image>   — replace or append "output * bg" in sway-output.
@@ -157,7 +118,6 @@ apply_sway_theme() {
         -e "s|^set \$sway_cl_col_urgt.*|set \$sway_cl_col_urgt $color1|"
         -e "s|^set \$sway_cl_col_phol.*|set \$sway_cl_col_phol $background|"
     )
-    # GTK settings only exist in the static palettes, not in pywal's.
     if [[ -n "${gtk_theme:-}" ]]; then
         e+=(
             -e "s|^set \$sway_gtk_theme.*|set \$sway_gtk_theme    $gtk_theme|"
@@ -294,10 +254,9 @@ case "${1:-}" in
     --dark|--default) load_palette "$THEME_DIR/dark.bash"   dark  "Applying Dark Theme…" ;;
     --light)          load_palette "$THEME_DIR/light.bash"  light "Applying Light Theme…" ;;
     --orange)         load_palette "$THEME_DIR/orange.bash" dark  "Applying IC Orange Theme…" ;;
-    --pywal)          source_pywal ;;
     --wallpaper)      set_wallpaper_only "${2:-}"; exit 0 ;;
     *)
-        echo "Usage: theme.sh --dark | --light | --orange | --pywal | --wallpaper PATH" >&2
+        echo "Usage: theme.sh --dark | --light | --orange | --wallpaper PATH" >&2
         exit 1
         ;;
 esac
