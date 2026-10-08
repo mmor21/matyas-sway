@@ -48,7 +48,6 @@ set $rofi_powermenu   ~/.config/sway/scripts/rofi_powermenu
 set $rofi_screenshot  ~/.config/sway/scripts/rofi_screenshot
 set $rofi_network     ~/.config/sway/scripts/rofi_network
 set $rofi_bluetooth   ~/.config/sway/scripts/rofi_bluetooth
-set $rofi_asroot      ~/.config/sway/scripts/rofi_asroot
 
 ##-- Startup Programs --------------------
 exec_always ~/.config/sway/scripts/startup
@@ -66,7 +65,6 @@ bindsym $mod+Shift+w         exec $browser
 bindsym $alt+F1              exec $rofi_launcher
 bindsym $alt+F2              exec $rofi_runner
 bindsym $mod+d               exec $rofi_launcher
-bindsym $mod+r               exec $rofi_asroot
 bindsym $mod+n               exec $rofi_network
 bindsym $mod+x               exec $rofi_powermenu
 bindsym $mod+s               exec $rofi_screenshot
