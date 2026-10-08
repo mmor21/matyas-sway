@@ -13,7 +13,6 @@
 set -euo pipefail
 
 DIR="$HOME/.config/sway"
-iDIR="$DIR/mako/icons"
 
 # Read accent color from the shared rofi colors file for the slurp overlay
 background="$(grep 'background:' "$DIR/rofi/shared/colors.rasi" | cut -d: -f2 | tr -d ' ;')"
@@ -33,7 +32,6 @@ notify_shot() {
     notify-send \
         -h string:x-canonical-private-synchronous:sys-notify-shot \
         -u low \
-        -i "$iDIR/picture.png" \
         "$msg"
 }
 
@@ -44,7 +42,6 @@ countdown() {
         notify-send \
             -h string:x-canonical-private-synchronous:sys-notify-count \
             -t 1000 \
-            -i "$iDIR/timer.png" \
             "Taking shot in : $sec"
         sleep 1
     done

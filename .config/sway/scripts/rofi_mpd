@@ -6,7 +6,6 @@ set -euo pipefail
 
 DIR="$HOME/.config/sway"
 RASI="$DIR/rofi/music.rasi"
-iDIR="$DIR/mako/icons"
 
 status="$(mpc status 2>/dev/null || true)"
 if [[ -z "$status" ]]; then
@@ -36,7 +35,7 @@ run_rofi() {
     printf '%s\n' "$option_1" "$option_2" "$option_3" "$option_4" "$option_5" "$option_6" | rofi_cmd
 }
 
-notify_song="notify-send -h string:x-canonical-private-synchronous:sys-notify-song -u low -i $iDIR/music.png"
+notify_song="notify-send -h string:x-canonical-private-synchronous:sys-notify-song -u low"
 
 run_cmd() {
     case "$1" in

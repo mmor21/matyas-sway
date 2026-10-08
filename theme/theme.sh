@@ -66,7 +66,6 @@ notify() {
     notify-send \
         -h string:x-canonical-private-synchronous:sys-notify-theme \
         -u normal \
-        -i "$SWAY_DIR/mako/icons/palette.png" \
         "$1" 2>/dev/null || true
 }
 

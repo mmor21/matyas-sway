@@ -17,23 +17,9 @@ color="$(hyprpicker)" || exit 0
 # Copy hex code to clipboard (no trailing newline)
 printf '%s' "$color" | wl-copy
 
-# Generate a preview swatch if ImageMagick is available
-image="/tmp/${color#\#}.png"
-if command -v convert >/dev/null 2>&1; then
-    convert -size 48x48 "xc:$color" "$image" 2>/dev/null || image=""
-fi
-
 # Notify
-if [[ -n "$image" ]]; then
-    notify-send \
-        -h string:x-canonical-private-synchronous:sys-notify-picker \
-        -u low \
-        -i "$image" \
-        "$color copied to clipboard."
-else
-    notify-send \
-        -h string:x-canonical-private-synchronous:sys-notify-picker \
-        -u low \
-        "$color copied to clipboard."
-fi
+notify-send \
+    -h string:x-canonical-private-synchronous:sys-notify-picker \
+    -u low \
+    "$color copied to clipboard."
 

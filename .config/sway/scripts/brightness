@@ -9,7 +9,6 @@
 
 set -euo pipefail
 
-iDIR="$HOME/.config/sway/mako/icons"
 notify_cmd='notify-send -h string:x-canonical-private-synchronous:sys-notify-backlight -u low'
 
 # Get current brightness as an integer percentage 0-100
@@ -21,39 +20,20 @@ get_brightness() {
     echo "$pct"
 }
 
-# Pick an icon based on the current brightness
-get_icon() {
-    local current
-    current="$(get_brightness)"
-    if   (( current <= 20 )); then
-        icon="$iDIR/brightness-20.png"
-    elif (( current <= 40 )); then
-        icon="$iDIR/brightness-40.png"
-    elif (( current <= 60 )); then
-        icon="$iDIR/brightness-60.png"
-    elif (( current <= 80 )); then
-        icon="$iDIR/brightness-80.png"
-    else
-        icon="$iDIR/brightness-100.png"
-    fi
-}
-
 # Send a notification
 notify_user() {
-    ${notify_cmd} -i "$icon" "Brightness : $(get_brightness)%"
+    ${notify_cmd} "Brightness : $(get_brightness)%"
 }
 
 # Increase
 inc_brightness() {
     brightnessctl set 5%+
-    get_icon
     notify_user
 }
 
 # Decrease
 dec_brightness() {
     brightnessctl set 5%-
-    get_icon
     notify_user
 }
 

@@ -11,7 +11,6 @@
 
 set -euo pipefail
 
-iDIR="$HOME/.config/sway/mako/icons"
 notify_cmd='notify-send -h string:x-canonical-private-synchronous:sys-notify-volume -u low'
 
 # Get current volume as an integer 0-100
@@ -19,24 +18,9 @@ get_volume() {
     pamixer --get-volume
 }
 
-# Pick an icon based on the current volume
-get_icon() {
-    local current
-    current="$(get_volume)"
-    if   (( current == 0 )); then
-        icon="$iDIR/volume-mute.png"
-    elif (( current <= 30 )); then
-        icon="$iDIR/volume-low.png"
-    elif (( current <= 60 )); then
-        icon="$iDIR/volume-mid.png"
-    else
-        icon="$iDIR/volume-high.png"
-    fi
-}
-
 # Send a notification
 notify_user() {
-    ${notify_cmd} -i "$icon" "Volume : $(get_volume)%"
+    ${notify_cmd} "Volume : $(get_volume)%"
 }
 
 # Increase
@@ -45,7 +29,6 @@ inc_volume() {
         pamixer --unmute
     fi
     pamixer --allow-boost --increase 5
-    get_icon
     notify_user
 }
 
@@ -55,7 +38,6 @@ dec_volume() {
         pamixer --unmute
     fi
     pamixer --decrease 5
-    get_icon
     notify_user
 }
 
@@ -63,11 +45,10 @@ dec_volume() {
 toggle_mute() {
     if [[ "$(pamixer --get-mute)" == "false" ]]; then
         pamixer --mute
-        ${notify_cmd} -i "$iDIR/volume-mute.png" "Mute"
+        ${notify_cmd} "Mute"
     else
         pamixer --unmute
-        get_icon
-        ${notify_cmd} -i "$icon" "Unmute"
+        ${notify_cmd} "Unmute"
     fi
 }
 
@@ -75,10 +56,10 @@ toggle_mute() {
 toggle_mic() {
     if [[ "$(pamixer --default-source --get-mute)" == "false" ]]; then
         pamixer --default-source --mute
-        ${notify_cmd} -i "$iDIR/microphone-mute.png" "Microphone Switched OFF"
+        ${notify_cmd} "Microphone Switched OFF"
     else
         pamixer --default-source --unmute
-        ${notify_cmd} -i "$iDIR/microphone.png" "Microphone Switched ON"
+        ${notify_cmd} "Microphone Switched ON"
     fi
 }
 
