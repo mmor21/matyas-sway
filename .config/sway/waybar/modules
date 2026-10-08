@@ -122,36 +122,7 @@
         "smooth-scrolling-threshold": 1
     },
 
-     // ─── Network ───────────────────────────────────────────────
-    "network": {
-        "interval": 5,
-        "format-wifi":         " {essid}",
-        "format-ethernet":     " {ipaddr}/{cidr}",
-        "format-linked":       " {ifname} (No IP)",
-        "format-disconnected": " Disconnected",
-        "format-disabled":     " Disabled",
-        "format-alt":          " {bandwidthUpBits} |  {bandwidthDownBits}",
-        "tooltip-format":      " {ifname} via {gwaddr}",
-        "on-click-right": "~/.config/sway/scripts/rofi_network"
-    },
-
-    // ─── Bluetooth ─────────────────────────────────────────────
-    "bluetooth": {
-        "format":             "BT:{status}",
-        "format-on":          "BT:{status}",
-        "format-off":         "BT:{status}",
-        "format-disabled":    " {status}",
-        "format-connected":   "BT:{device_alias}",
-        "format-connected-battery": " {device_alias}, {device_battery_percentage}%",
-        "tooltip": true,
-        "tooltip-format": "{controller_alias}\t{controller_address}",
-        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
-        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
-        "on-click":       "~/.config/sway/scripts/rofi_bluetooth",
-        "on-click-right": "blueman-manager"
-    },
-
-    // ─── Battery ───────────────────────────────────────────────
+     // ─── Battery ───────────────────────────────────────────────
     "battery": {
         "interval": 60,
         "align": 0,
