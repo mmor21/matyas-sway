@@ -80,7 +80,6 @@
         "interval": 60,
         "align": 0,
         "rotate": 0,
-        "locale": "en_GB.UTF-8",
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
         "calendar": {
             "mode": "month",
@@ -95,7 +94,7 @@
                 "today":    "<span background='#8fa1b3' color='#2b303b'><b><u>{}</u></b></span>"
             }
         },
-        "format":     " {:%I:%M %p}",
+        "format":     " {:%H:%M}",
         "format-alt": " {:%a %b %d, %G}"
     },
 
