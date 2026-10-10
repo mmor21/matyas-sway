@@ -169,15 +169,10 @@ change the palette.
 
 For a fresh CachyOS Sway Edition install.
 
-**Before you install:** run a full system upgrade.
+Before running the script a full system upgrade is recommended
+(`sudo pacman -Syu`).
 
-    sudo pacman -Syu
-
-Recommended on a clean install. Freshly-installed apps can fail to
-launch if the base system's libraries are out of date — for example,
-ghostty will not start if libadwaita and gtk4 are out of sync.
-
-**Then install:**
+Then install:
 
     curl -fsSL https://raw.githubusercontent.com/mmor21/matyas-sway/main/install/install.sh | bash
 
@@ -186,11 +181,10 @@ what it will do, asks once, then clones the repo to `~/matyas-sway`,
 installs the packages in `install/packages.txt`, and copies the config
 into `~/.config/`.
 
-It creates `~/.config/backgrounds/` (empty — add your wallpapers) and
-does not touch `/etc/sway/`, `ly`, or `/usr/share/wayland-sessions/`.
+It does not touch `/etc/sway/`, `ly`, or `/usr/share/wayland-sessions/`.
 
-**After installing:** log out and log back in, and select **Sway** at
-the login screen.
+After installing: log out and log back in, and select **Sway** at the
+login screen.
 
 ### Wallpapers
 
