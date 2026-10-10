@@ -208,31 +208,36 @@ change the palette.
 
 ## Install
 
-An installer script is planned (Phase 4). Until then, manual install:
+For a fresh CachyOS Sway Edition install.
 
-    git clone https://github.com/mmor21/matyas-sway.git ~/matyas-sway
-    cp -a ~/matyas-sway/.config/sway     ~/.config/
-    cp -a ~/matyas-sway/theme            ~/.config/sway/theme
-    cp -a ~/matyas-sway/.config/sway/nwg-dock ~/.config/nwg-dock
-    chmod +x ~/.config/sway/scripts/*
+**Before you install:** run a full system upgrade.
 
-Then log out and select **Sway** at the login screen.
+    sudo pacman -Syu
 
-Required packages (Arch):
+Recommended on a clean install. Freshly-installed apps can fail to
+launch if the base system's libraries are out of date — for example,
+ghostty will not start if libadwaita and gtk4 are out of sync.
 
-    sway swaybg swayidle swaylock waybar rofi mako kitty ghostty
-    nwg-dock cliphist wl-clipboard wtype grim slurp swappy
-    brightnessctl pamixer pavucontrol networkmanager
-    networkmanager-dmenu thunar firefox
-    polkit-gnome hyprpicker blueman
-    jq bc python xdg-user-dirs
+**Then install:**
 
-Additional dependencies:
+    curl -fsSL https://raw.githubusercontent.com/mmor21/matyas-sway/main/install/install.sh | bash
 
-- **Volantes cursors** — from GitHub (see installer notes)
-- **Papirus icons** — `papirus-icon-theme`
-- **Noto Sans Mono** — `noto-fonts`
-- **Powerline / Nerd Fonts** — for some menu icons
+The installer checks that this is a fresh install, shows a summary of
+what it will do, asks once, then clones the repo to `~/matyas-sway`,
+installs the packages in `install/packages.txt`, and copies the config
+into `~/.config/`.
+
+It creates `~/.config/backgrounds/` (empty — add your wallpapers) and
+does not touch `/etc/sway/`, `ly`, or `/usr/share/wayland-sessions/`.
+
+**After installing:** log out and log back in, and select **Sway** at
+the login screen.
+
+### Wallpapers
+
+The installer creates `~/.config/backgrounds/` but leaves it empty.
+Drop image files there, then use the theme menu (`$mod+Ctrl+t` →
+Change Wallpaper) to pick one.
 
 ## Known limitations
 
