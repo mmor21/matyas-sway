@@ -43,7 +43,6 @@ set $files            thunar
 set $browser          firefox
 
 set $rofi_launcher    ~/.config/sway/scripts/rofi_launcher
-set $rofi_runner      ~/.config/sway/scripts/rofi_runner
 set $rofi_powermenu   ~/.config/sway/scripts/rofi_powermenu
 set $rofi_screenshot  ~/.config/sway/scripts/rofi_screenshot
 set $rofi_network     ~/.config/sway/scripts/rofi_network
@@ -63,7 +62,6 @@ bindsym $mod+Shift+w         exec $browser
 
 # -- Rofi --
 bindsym $alt+F1              exec $rofi_launcher
-bindsym $alt+F2              exec $rofi_runner
 bindsym $mod+d               exec $rofi_launcher
 bindsym $mod+n               exec $rofi_network
 bindsym $mod+x               exec $rofi_powermenu
