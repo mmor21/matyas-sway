@@ -129,7 +129,7 @@ say "  will NOT touch:"
 say "    /etc/sway/, ly, /usr/share/wayland-sessions/, any systemd service"
 say ""
 
-read -r -p "Proceed? [y/N] " reply
+read -r -p "Proceed? [y/N] " reply < /dev/tty
 case "$reply" in
     [yY]|[yY][eE][sS]) ;;
     *) say ""; say "Aborted. Nothing was changed."; exit 0 ;;
