@@ -1,0 +1,69 @@
+# Matyas Sway — installer package list
+#
+# Read by install/install.sh. Two categories:
+#
+#   [A] Must install. The config is unusable without these.
+#       If any fails to install, the installer stops.
+#
+#   [B] Verify. These should already be in CachyOS Sway Edition.
+#       The installer checks each one and installs it only if missing.
+#       If any fails, the installer continues but reports it at the end.
+#       This section doubles as a drift check against future CachyOS ISOs.
+#
+# Format: one package name per line. Blank lines and # comments ignored.
+
+[A]
+
+# Menus and launcher — without rofi, every menu is dead
+rofi
+
+# Notifications — startup runs mako; scripts notify through it
+mako
+
+# Clipboard history — startup runs the watchers; Clip module feeds from it
+cliphist
+
+# Bottom dock — startup runs it; $alt+X toggles it
+nwg-dock
+
+# Volume keys — scripts/volume calls pamixer
+pamixer
+
+# Color picker — $mod+p calls hyprpicker
+hyprpicker
+
+# File manager — $files in the config
+thunar
+
+# Polkit authentication agent for GUI privilege prompts
+polkit-gnome
+
+[B]
+
+# Compositor-adjacent — expected in base, verified for drift
+waybar
+swaybg
+swayidle
+swaylock
+wl-clipboard
+grim
+slurp
+brightnessctl
+
+# System services — expected enabled in base
+networkmanager
+bluez-utils
+
+# Fonts and locale support
+noto-fonts
+ttf-meslo-nerd
+
+# Utilities the scripts depend on
+jq
+python
+xdg-user-dirs
+xdg-utils
+
+# Terminal and editor — degraded but not fatal if missing
+ghostty
+mousepad
