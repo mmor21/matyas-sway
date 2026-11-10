@@ -1,232 +1,103 @@
 #!/usr/bin/env bash
-#
-# Matyas Sway — installer
-#
-# For a fresh CachyOS Sway Edition install. Refuses to run if a
-# matyas-sway config or clone is already present. See the pre-flight
-# summary for exactly what it will do.
-#
-# Usage (one-liner):
-#   curl -fsSL https://raw.githubusercontent.com/mmor21/matyas-sway/main/install/install.sh | bash
-#
-# Or, from a clone:
-#   bash install/install.sh
-
-set -euo pipefail
-
-##─ Constants ──────────────────────────────────────────────────────
-
-REPO_URL="https://github.com/mmor21/matyas-sway"
+# Matyas Sway installer. Existing files are backed up, never deleted.
+set -Eeuo pipefail
+REPO_URL=https://github.com/mmor21/matyas-sway
 CLONE_DIR="$HOME/matyas-sway"
 CONFIG_DIR="$HOME/.config/sway"
-BACKGROUNDS_DIR="$HOME/.config/backgrounds"
-GHOSTTY_DIR="$HOME/.config/ghostty"
-NWGDOCK_DIR="$HOME/.config/nwg-dock"
-MIMEAPPS="$HOME/.config/mimeapps.list"
-
-##─ Output helpers ─────────────────────────────────────────────────
-
-say()  { printf '%s\n' "$*"; }
-ok()   { printf '  ok   %s\n' "$*"; }
-info() { printf '  --   %s\n' "$*"; }
-warn() { printf 'WARN: %s\n' "$*" >&2; }
-die()  { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
-
-##─ Guards ─────────────────────────────────────────────────────────
-## All checks happen before anything is modified. Any failure exits
-## with a clear message and leaves the system untouched.
-
-say "Matyas Sway installer"
-say ""
-
-command -v pacman >/dev/null 2>&1 \
-    || die "pacman not found. This installer targets Arch-family systems."
-
-[[ $EUID -ne 0 ]] \
-    || die "Do not run as root. Run as the user who will own the config."
-
-[[ ! -e "$CONFIG_DIR" ]] \
-    || die "$CONFIG_DIR already exists. This installer is for fresh installs only. Nothing has been changed."
-
-[[ ! -e "$CLONE_DIR" ]] \
-    || die "$CLONE_DIR already exists. Remove it or rename it, then run again. Nothing has been changed."
-
-command -v git >/dev/null 2>&1 \
-    || die "git not found. Install it and run again."
-
-ok "guards passed"
-
-##─ Pre-flight ─────────────────────────────────────────────────────
-## Fetch packages.txt before cloning, so the summary is honest and
-## nothing is created before the user confirms.
-
-say ""
-say "Fetching package list..."
-PKG_LIST_URL="$REPO_URL/raw/main/install/packages.txt"
-PKG_LIST_RAW="$(curl -fsSL "$PKG_LIST_URL")" \
-    || die "Could not fetch $PKG_LIST_URL. Check your network."
-
-# Parse into two arrays. Section markers switch the current bucket.
-declare -a PKG_A=() PKG_B=()
-bucket=""
-while IFS= read -r line; do
+WORK=""
+BACKUP=""
+say() { printf '%s\n' "$*"; }
+die() { say "ERROR: $*" >&2; exit 1; }
+cleanup() { if [[ -n "$WORK" && -d "$WORK" ]]; then rm -rf -- "$WORK"; fi; }
+trap cleanup EXIT
+trap 'printf "ERROR: installer stopped at line %s (status %s). Existing backups, if created, remain at %s\n" "$LINENO" "$?" "${BACKUP:-not yet created}" >&2' ERR
+[[ $EUID -ne 0 ]] || die 'Run as your normal user, not root.'
+for cmd in pacman git sudo mktemp cp mv; do
+    command -v "$cmd" >/dev/null || die "Required command missing: $cmd"
+done
+[[ -r /dev/tty && -w /dev/tty ]] || die 'Run this from an interactive terminal.'
+say 'Matyas Sway installer'
+say 'This will download main, install required packages, and try optional packages individually.'
+say 'Before copying configs, existing sway, ghostty, nwg-dock, mimeapps.list and ~/matyas-sway will be moved into a timestamped backup in your home.'
+say 'Backgrounds are preserved. No services, /etc/sway or session definitions are changed.'
+say 'Package installation may ask you to resolve conflicts; no automatic system upgrade is performed.'
+read -r -p 'Proceed? [y/N] ' reply < /dev/tty
+case "$reply" in y|Y|yes|YES|Yes) ;; *) say 'Aborted. Nothing changed.'; exit 0 ;; esac
+WORK=$(mktemp -d "$HOME/.matyas-sway-install.XXXXXXXX")
+git clone --depth 1 --branch main "$REPO_URL" "$WORK/repo"
+SRC="$WORK/repo"
+for path in .config/sway theme .config/ghostty .config/sway/nwg-dock; do
+    [[ -d "$SRC/$path" ]] || die "Repository directory missing: $path"
+done
+for path in install/packages.txt .config/mimeapps.list .config/sway/config; do
+    [[ -f "$SRC/$path" ]] || die "Repository file missing: $path"
+done
+declare -a PKG_A=() PKG_B=() FAILED_B=()
+bucket=''
+while IFS= read -r line || [[ -n "$line" ]]; do
+    line=${line%$'\r'}
     case "$line" in
-        \[A\]) bucket="A" ;;
-        \[B\]) bucket="B" ;;
+        '[A]') bucket=A ;;
+        '[B]') bucket=B ;;
         \#*|'') continue ;;
-        *)    [[ -z "$bucket" ]] && continue
-              if [[ "$bucket" == "A" ]]; then PKG_A+=("$line")
-              else PKG_B+=("$line"); fi ;;
+        *) [[ "$line" =~ ^[a-zA-Z0-9@._+-]+$ ]] || die "Invalid package entry: $line"
+           case "$bucket" in
+               A) PKG_A+=("$line") ;;
+               B) PKG_B+=("$line") ;;
+               *) die 'Package listed before section marker.' ;;
+           esac ;;
     esac
-done <<< "$PKG_LIST_RAW"
-
-(( ${#PKG_A[@]} > 0 && ${#PKG_B[@]} > 0 )) \
-    || die "Failed to parse packages.txt (A=${#PKG_A[@]}, B=${#PKG_B[@]})."
-
-# Which are missing?
-declare -a MISSING_A=() MISSING_B=()
+done < "$SRC/install/packages.txt"
+(( ${#PKG_A[@]} > 0 )) || die 'Required package list is empty.'
+sudo -v < /dev/tty
+say 'Installing required packages...'
+if ! sudo pacman -S --needed "${PKG_A[@]}" < /dev/tty; then
+    die 'Required package transaction failed. Existing configs and previous clone have NOT been touched. Correct the displayed pacman error, then rerun this installer.'
+fi
 for p in "${PKG_A[@]}"; do
-    pacman -Qi "$p" >/dev/null 2>&1 || MISSING_A+=("$p")
+    pacman -Q "$p" >/dev/null 2>&1 || die "Required package missing after installation: $p. Existing configs have NOT been touched."
 done
 for p in "${PKG_B[@]}"; do
-    pacman -Qi "$p" >/dev/null 2>&1 || MISSING_B+=("$p")
-done
-
-# Summary
-say ""
-say "This will install matyas-sway on this machine."
-say ""
-say "  user:          $(whoami)"
-say "  home:          $HOME"
-say ""
-say "  will clone:    $CLONE_DIR"
-say "  from:          $REPO_URL"
-say ""
-
-if (( ${#MISSING_A[@]} == 0 && ${#MISSING_B[@]} == 0 )); then
-    say "  packages:      all already present, nothing to install"
-else
-    say "  packages to install:"
-    for p in "${MISSING_A[@]}"; do say "    [A] $p"; done
-    for p in "${MISSING_B[@]}"; do say "    [B] $p"; done
-fi
-
-say ""
-say "  will copy:"
-say "    $CLONE_DIR/.config/sway/          -> $CONFIG_DIR/"
-say "    $CLONE_DIR/theme/                 -> $CONFIG_DIR/theme/"
-say "    $CLONE_DIR/.config/ghostty/       -> $GHOSTTY_DIR/"
-say "    $CLONE_DIR/.config/sway/nwg-dock/ -> $NWGDOCK_DIR/"
-say "    $CLONE_DIR/.config/mimeapps.list  -> $MIMEAPPS"
-say ""
-say "  will create (empty):"
-say "    $BACKGROUNDS_DIR/   (drop wallpapers here later)"
-say ""
-say "  will check (not touch):"
-say "    $CONFIG_DIR/ must not already exist"
-say ""
-say "  will NOT touch:"
-say "    /etc/sway/, ly, /usr/share/wayland-sessions/, any systemd service"
-say ""
-
-read -r -p "Proceed? [y/N] " reply < /dev/tty
-case "$reply" in
-    [yY]|[yY][eE][sS]) ;;
-    *) say ""; say "Aborted. Nothing was changed."; exit 0 ;;
-esac
-
-##─ Clone ──────────────────────────────────────────────────────────
-
-say ""
-say "Cloning $REPO_URL ..."
-git clone --depth 1 "$REPO_URL" "$CLONE_DIR" >/dev/null 2>&1 \
-    || die "git clone failed. Nothing further was changed."
-ok "cloned to $CLONE_DIR"
-
-##─ Packages ───────────────────────────────────────────────────────
-
-if (( ${#MISSING_A[@]} > 0 || ${#MISSING_B[@]} > 0 )); then
-    say ""
-    say "Installing missing packages..."
-    # Re-check against the clone's packages.txt in case it differs from
-    # what we fetched. (Normally identical; this is defensive.)
-    if ! sudo pacman -S --needed --noconfirm "${MISSING_A[@]}" "${MISSING_B[@]}"; then
-        # Did every A package land?
-        failed_A=()
-        for p in "${MISSING_A[@]}"; do
-            pacman -Qi "$p" >/dev/null 2>&1 || failed_A+=("$p")
-        done
-        if (( ${#failed_A[@]} > 0 )); then
-            die "Category A package(s) failed to install: ${failed_A[*]}
-The session would be unusable without them. Stopping.
-Config files: NOT copied.
-Clone:         left at $CLONE_DIR (remove it manually if you re-run)."
+    if ! pacman -Q "$p" >/dev/null 2>&1; then
+        say "Installing optional package: $p"
+        if ! sudo pacman -S --needed "$p" < /dev/tty; then
+            say "WARNING: optional package failed: $p; continuing." >&2
         fi
-        warn "Some category B packages may have failed. Continuing; the summary will list them."
     fi
-else
-    say ""
-    ok "all packages already present"
-fi
-
-# Recompute B failures for the summary.
-declare -a FAILED_B=()
-for p in "${MISSING_B[@]}"; do
-    pacman -Qi "$p" >/dev/null 2>&1 || FAILED_B+=("$p")
+    pacman -Q "$p" >/dev/null 2>&1 || FAILED_B+=("$p")
 done
-
-##─ Copy config ────────────────────────────────────────────────────
-
-say ""
-say "Copying config files..."
-
-copy_tree() {
-    local src="$1" dst="$2"
-    mkdir -p "$dst"
-    cp -a "$src/." "$dst/"
+# Stage the complete Sway tree before replacing any existing configuration.
+mkdir -p "$WORK/sway"
+cp -a "$SRC/.config/sway/." "$WORK/sway/"
+mkdir -p "$WORK/sway/theme"
+cp -a "$SRC/theme/." "$WORK/sway/theme/"
+BACKUP=$(mktemp -d "$HOME/matyas-sway-backup-$(date +%Y%m%d-%H%M%S).XXXXXXXX")
+backup_path() {
+    local path="$1" name="$2"
+    if [[ -e "$path" || -L "$path" ]]; then
+        mv -- "$path" "$BACKUP/$name"
+        say "Backed up $path to $BACKUP/$name"
+    fi
 }
-
-copy_tree "$CLONE_DIR/.config/sway"          "$CONFIG_DIR"
-copy_tree "$CLONE_DIR/theme"                 "$CONFIG_DIR/theme"
-copy_tree "$CLONE_DIR/.config/ghostty"       "$GHOSTTY_DIR"
-copy_tree "$CLONE_DIR/.config/sway/nwg-dock" "$NWGDOCK_DIR"
-
-mkdir -p "$(dirname "$MIMEAPPS")"
-cp -a "$CLONE_DIR/.config/mimeapps.list" "$MIMEAPPS"
-
-# Empty backgrounds dir; user drops wallpapers in later.
-mkdir -p "$BACKGROUNDS_DIR"
-
-ok "config copied"
-
-##─ Permissions ────────────────────────────────────────────────────
-
-chmod +x "$CONFIG_DIR"/scripts/*          2>/dev/null || true
-chmod +x "$CONFIG_DIR"/theme/*.sh         2>/dev/null || true
-chmod +x "$CONFIG_DIR"/theme/*.py         2>/dev/null || true
-chmod +x "$CONFIG_DIR"/waybar/lightmode   2>/dev/null || true
-
-ok "permissions set"
-
-##─ Summary ────────────────────────────────────────────────────────
-
-say ""
-say "Done."
-say ""
-say "  clone:      $CLONE_DIR"
-say "  config:     $CONFIG_DIR"
-say "  wallpapers: $BACKGROUNDS_DIR   (empty — add images yourself)"
-say ""
-
+mkdir -p "$HOME/.config"
+backup_path "$CONFIG_DIR" sway
+backup_path "$HOME/.config/ghostty" ghostty
+backup_path "$HOME/.config/nwg-dock" nwg-dock
+backup_path "$HOME/.config/mimeapps.list" mimeapps.list
+backup_path "$CLONE_DIR" previous-clone
+mv -- "$WORK/sway" "$CONFIG_DIR"
+mkdir -p "$HOME/.config/ghostty" "$HOME/.config/nwg-dock" "$HOME/.config/backgrounds"
+cp -a "$SRC/.config/ghostty/." "$HOME/.config/ghostty/"
+cp -a "$SRC/.config/sway/nwg-dock/." "$HOME/.config/nwg-dock/"
+cp -a "$SRC/.config/mimeapps.list" "$HOME/.config/mimeapps.list"
+mv -- "$SRC" "$CLONE_DIR"
+chmod +x "$CONFIG_DIR"/scripts/* 2>/dev/null || true
+chmod +x "$CONFIG_DIR"/theme/*.sh "$CONFIG_DIR"/theme/*.py 2>/dev/null || true
+chmod +x "$CONFIG_DIR"/waybar/lightmode 2>/dev/null || true
+say 'Installation complete.'
+say "Existing files preserved at: $BACKUP"
 if (( ${#FAILED_B[@]} > 0 )); then
-    warn "The following category B packages did not install:"
-    for p in "${FAILED_B[@]}"; do warn "  $p"; done
-    say ""
-    say "The session will still work; the affected features will be missing"
-    say "until those packages are installed."
-    say ""
+    say "Optional packages still missing: ${FAILED_B[*]}"
+    say 'Their associated features may not work.'
 fi
-
-say "Sway is still running the stock config from this session."
-say "Log out and log back in (or reboot) to load matyas-sway."
-say ""
+say 'Log out and back in to load the new configuration. Keep your backup until you have verified the session.'
